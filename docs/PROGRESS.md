@@ -350,3 +350,140 @@
 
 
 
+
+---
+
+## Module: Backend API and LLM Integration (Part A - LLM Layer, Profile Extraction & PII Guard)
+
+- **Status**: Completed
+- **Date**: 2026-11-01
+
+### What Was Built & Modified
+1. **PII Guard Service (`backend/app/services/pii_guard.py`)**:
+   - Upgraded regex detection across Aadhaar (4-4-4 format with hyphens/spaces and continuous 12 digits), PAN (case-insensitive 5 letters, 4 digits, 1 letter), Indian phone numbers (10 digits starting with 6-9, with optional +91/0 prefix and delimiters), and standard email addresses.
+   - Preserves legitimate scheme criteria numbers (age, income like 250000, pincodes, land acreage, years) from accidental false-positive redaction.
+   - Implemented `scan_and_redact()` returning `PIIGuardResult` with sanitized text, detected PII categories, and bilingual user advisory notices ("Notice: Sensitive personal details were detected and removed...").
+   - Preserved backwards-compatible `sanitize()` classmethod.
+
+2. **LLM Layer & Groq Provider (`backend/app/services/llm_client.py`)**:
+   - Defined `LLMClient` abstract interface supporting unstructured text (`generate`) and schema-governed JSON (`generate_structured`).
+   - Implemented `GroqClient` with `GroqLLMClient` backwards-compatibility alias:
+     - Model and API key sourced strictly from typed settings (`GROQ_MODEL`, `GROQ_API_KEY`).
+     - Enforces 20-second timeout, 2 retries with exponential backoff on network/5xx/429 errors.
+     - Enforces application-wide daily budget tracking via `DailyCallTracker` against `LLM_DAILY_CALL_CAP`.
+     - Supports structured outputs with `response_format={"type": "json_schema", ...}` in strict mode.
+     - Gracefully degrades parameters: automatically strips `reasoning_effort` and/or `temperature` if rejected by the model API without crashing.
+     - Validates non-truncation (`finish_reason != "length"`) and non-empty responses.
+
+3. **Versioned Extraction Prompt (`backend/app/prompts/v1_profile_extraction.txt`)**:
+   - Versioned prompt template loaded from disk (never inline strings).
+   - Treats citizen message strictly as raw text data; explicitly ignores embedded prompts or injection attempts.
+   - Enforces zero LLM arithmetic (extracts raw numbers and raw units).
+   - Prohibits inferring sensitive fields (`social_category`, `disability_status`) unless explicitly stated.
+
+4. **Profile Extraction Service (`backend/app/services/profile_extractor.py`)**:
+   - Built `ProfileExtractorService` orchestrating PII pre-redaction, structured LLM extraction, deterministic currency/period calculations, and Pydantic validation.
+   - Implemented `calculate_annual_income()`: deterministic Python conversion for Indian monetary scales (crore, lakh, hazaar, k, rupees) and payment periods (monthly, annual, daily).
+   - Formatted strict JSON Schema where every UserProfile property is required and nullable (`[type, null]`), preventing hallucinated demographic attributes.
+   - Validates response with Pydantic `RawExtractedProfile`; retries once on schema/truncation error, and returns safe fallback (`"Please rephrase"`) if errors persist.
+   - Returns only detected fields as normalized English enum values.
+
+5. **Diagnostic & Benchmark Scripts (`backend/scripts/`)**:
+   - `scripts/smoke_llm.py`: Live Groq connectivity verification making one minimal call and printing strictly "OK" or the error type without exposing secrets.
+   - `scripts/try_extraction.py`: Benchmark script running 10 fixed scenarios (5 English, 3 Hindi, 2 Hinglish) and displaying a console comparison table.
+
+6. **Unit Test Suite (`backend/tests/unit/`)**:
+   - Added 60 comprehensive unit tests across 3 new test modules:
+     - `test_pii_guard.py`: 32 tests covering single/multiple PII formats, benign criteria preservation, and bilingual notices.
+     - `test_llm_client.py`: 8 tests covering config inheritance, daily call caps, structured JSON generation, parameter degradation, retry backoff, and truncation detection.
+     - `test_profile_extractor.py`: 20 tests covering income arithmetic across scales and frequencies, multilingual inputs, sensitive field omission guards, PII pre-redaction, retry logic, and safe fallback.
+   - All tests use 100% mocked LLM calls; zero live calls are made during pytest.
+
+### Decisions
+- Standardized on strict nullable JSON Schema for OpenAI/Groq structured outputs so missing demographic attributes evaluate to `null` instead of being invented.
+- Placed all currency and frequency arithmetic into pure Python, ensuring the LLM is strictly an extractor and never does math.
+- Added parameter degradation handling directly in `GroqClient` so variations across Groq-hosted models (such as models that reject `reasoning_effort` or `temperature`) fail open gracefully.
+
+### Assumptions
+- Input text is in English, Hindi, or Hinglish.
+- Citizen profile state is ephemeral and passed in-memory per request.
+
+### Open Issues / Next Steps
+- Implement Part B: API endpoints (`/intake/extract`, `/match`, `/schemes`, `/schemes/{slug}/ask`, `/feedback`) and security middleware.
+
+---
+
+## Module: Backend API and LLM Integration (Part B - Endpoints & Security Middleware)
+
+- **Status**: Completed
+- **Date**: 2026-11-01
+
+### What Was Built & Modified
+1. **API Endpoints (`backend/app/api/v1/`)**:
+   - `POST /api/v1/intake/extract`: Citizen message extraction endpoint. Orchestrates PII scrubbing, LLM extraction with structured JSON, profile merging, verified scheme evaluation in `RuleEngineService`, and `FollowupSelectorService` to select the highest-impact question across ambiguous candidate "maybe" schemes.
+   - `POST /api/v1/match`: Deterministic scheme qualification engine. Pre-filters schemes by state/level, evaluates all criteria in pure Python `RuleEngineService`, and returns results grouped into `eligible`, `maybe`, and `not_eligible` with bilingual human-readable reasons and `last_verified` dates. LLM is never called.
+   - `GET /api/v1/schemes`: Paginated listing of verified schemes with whitelisted state, level, and category filters. Excludes sample schemes unless `INCLUDE_SAMPLE_SCHEMES=True`.
+   - `GET /api/v1/schemes/{slug}`: Single scheme detail endpoint returning verified data or 404 Not Found.
+   - `POST /api/v1/schemes/{slug}/ask`: Grounded question answering endpoint delegating to stubbed `RAGService` that always returns `answerable=False`.
+   - `POST /api/v1/feedback`: Anonymous helpfulness rating collection with zero personal identifiers.
+   - Preserved `admin.py` without implementing routes (reserved for the admin module).
+
+2. **Clean Layered Separation & Dependencies (`backend/app/api/deps.py`, `backend/app/services/`)**:
+   - Created `IntakeService` and `MatchService` orchestrators keeping routers 100% free of business logic.
+   - Implemented dependency injection in `app/api/deps.py` for all services, clients, and repositories.
+
+3. **Defensive Security Middleware (`backend/app/core/middleware.py`, `backend/app/core/rate_limit.py`)**:
+   - `CORSMiddleware`: Configured with exact origins from `ALLOWED_ORIGINS` without wildcards.
+   - `SecurityHeadersMiddleware`: Injects `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and `Cache-Control: no-store` on all API responses.
+   - `RequestIdMiddleware`: Generates or propagates `X-Request-ID` across every request and response.
+   - `RequestBodyLimitMiddleware`: Enforces 32 KB maximum payload ceiling on JSON routes, counting actual received bytes across both `Content-Length` and chunked transfer streams, returning 413 `PAYLOAD_TOO_LARGE`.
+   - Per-IP Rate Limiting: Sliding 60-second window tracking requests per client IP, applying `RATE_LIMIT_PER_MINUTE` generally, and stricter limits (exactly `RATE_LIMIT_PER_MINUTE // 4`, lower, not higher) on `/intake/extract` and `/schemes/{slug}/ask`. Evicts expired entries older than the window to prevent unbounded memory growth.
+   - Client IP Detection: In production (`ENV=production`) behind Render's reverse proxy, uses the trusted rightmost IP appended by the proxy in `X-Forwarded-For`; in development (`ENV=development`), uses the direct socket peer address (`request.client.host`). Forged client `X-Forwarded-For` headers cannot bypass limits.
+   - `StructuredLoggingMiddleware`: Logs access events in structured JSON with duration, status, path, client IP, and request ID. Strictly omits request bodies, citizen messages, profile fields, or sensitive parameters.
+
+4. **Centralized Error Contract (`backend/app/core/errors.py`)**:
+   - Unified error format `{"error": {"code": "...", "message": "...", "request_id": "...", "details": ...}}`.
+   - Global exception handlers: `AppException`, `RequestValidationError` (422), `StarletteHTTPException`, `PayloadTooLargeError` (413), `LLMError` (mapped to friendly 429 or 503), and unhandled `Exception` (500 without leaking stack traces).
+
+5. **Test Suite & Verification (`backend/tests/api/test_api_v1.py`, `backend/tests/unit/test_schemas.py`)**:
+   - 23 comprehensive API integration tests and unit tests verifying:
+     - All endpoint success paths.
+     - `extra="forbid"` on all request schemas (`IntakeExtractRequest`, `MatchRequest`, `SchemeAskRequest`, `FeedbackCreate`, `UserProfile`, etc.).
+     - Oversize message (> 1000 chars) and payload size limit (fast-path Content-Length > 32 KB and chunked stream > 32 KB returning 413).
+     - Malformed JSON handling.
+     - LLM error mapping to 429 (`LLMRateLimitError`) and 503 (`LLMTimeoutError`, `LLMError`).
+     - Exact quarter rate limits (`RATE_LIMIT_PER_MINUTE // 4`) on `/intake/extract` and `/schemes/{slug}/ask`.
+     - Client IP determination: socket address in dev vs. Render proxy rightmost XFF IP in prod, with tests proving forged XFF cannot bypass rate limiting.
+     - Eviction of expired rate limiter entries older than 60s.
+     - Documentation routes (`/docs`, `/redoc`, `/openapi.json`) return 404 when `ENABLE_DOCS=False` and 200 when `ENABLE_DOCS=True`.
+     - CORS rejection for disallowed origins and acceptance for allowed origins.
+     - Defensive security headers (`nosniff`, `no-referrer`, `no-store`, `X-Request-ID`).
+     - Structured access logs contain zero citizen message text or profile data.
+
+### Follow-up Checks & Security Hardening
+1. **Rate Limits**:
+   - Base limit: `RATE_LIMIT_PER_MINUTE` (default 60 rpm).
+   - Stricter routes (`/intake/extract` and `/schemes/{slug}/ask`): Exactly `RATE_LIMIT_PER_MINUTE // 4` (e.g. 15 rpm when base is 60). Strictly lower, never higher.
+2. **Client IP Determination**:
+   - In development: Sourced from `request.client.host` (socket peer address). Forged `X-Forwarded-For` headers are ignored.
+   - In production (`ENV=production` behind Render): Sourced from the rightmost entry in `X-Forwarded-For` (`ips[-1].strip()`), which is the IP appended by Render's trusted proxy. Client-prepended spoofed IPs are ignored.
+3. **Body Size Limiting**:
+   - Lowered to 32 KB (32,768 bytes) across all JSON routes.
+   - ASGI middleware checks `Content-Length` on fast-path and intercepts `receive()` to count actual streamed bytes, catching chunked bodies without `Content-Length`.
+4. **Rate Limiter Memory Eviction**:
+   - `cleanup_expired(now)` purges keys whose timestamps are entirely older than the 60-second window, running on check and periodic maintenance to prevent unbounded memory growth.
+5. **Documentation Toggle & Schema Invariants**:
+   - `/docs`, `/redoc`, and `/openapi.json` return 404 when `ENABLE_DOCS=False`, and 200 when `ENABLE_DOCS=True`.
+   - Every request model explicitly configures `model_config = ConfigDict(extra="forbid")`.
+
+### Decisions
+- Standardized error format with `request_id` attached automatically from `request.state.request_id` across all HTTP handlers.
+- Decoupled router layer completely from business logic by introducing `IntakeService` and `MatchService`.
+- Excluded wildcards in CORS configuration to prevent unauthorized cross-origin requests.
+
+### Assumptions
+- Frontend client communicates exclusively over JSON with `extra="forbid"`.
+- Scheme guidelines Q&A remains stubbed (`answerable=False`) until the RAG vector search module is built.
+
+### Open Issues / Next Steps
+- Implement Admin authentication, dashboard, and scheme verification workflows.

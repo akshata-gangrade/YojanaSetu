@@ -4,7 +4,9 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.v1 import api_router
 from app.api.v1.health import router as health_router
@@ -13,9 +15,19 @@ from app.core.errors import (
     AppException,
     app_exception_handler,
     generic_exception_handler,
+    http_exception_handler,
+    llm_exception_handler,
+    validation_exception_handler,
 )
 from app.core.logging import logger, setup_logging
+from app.core.middleware import (
+    RequestBodyLimitMiddleware,
+    RequestIdMiddleware,
+    SecurityHeadersMiddleware,
+    StructuredLoggingMiddleware,
+)
 from app.db.mongo import MongoDBManager
+from app.services.llm_client import LLMError
 
 
 @asynccontextmanager
@@ -48,23 +60,39 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         lifespan=lifespan,
     )
 
-    # Cross-Origin Resource Sharing (CORS) Allowlist
+    # 1. CORS Allowlist: exact origins only, strictly avoiding wildcards
+    raw_origins = (
+        settings.ALLOWED_ORIGINS
+        if isinstance(settings.ALLOWED_ORIGINS, list)
+        else [settings.ALLOWED_ORIGINS]
+    )
+    exact_origins = [o.strip() for o in raw_origins if o.strip() and o.strip() != "*"]
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.ALLOWED_ORIGINS,
+        allow_origins=exact_origins,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=["*"],
     )
 
-    # Centralized exception handlers for consistent API error contracts
+    # 2. Defensive Security and Request Limits
+    app.add_middleware(RequestBodyLimitMiddleware)
+    app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(StructuredLoggingMiddleware)
+    app.add_middleware(RequestIdMiddleware)
+
+    # 3. Centralized exception handlers for consistent API error contracts
     app.add_exception_handler(AppException, app_exception_handler)
+    app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+    app.add_exception_handler(LLMError, llm_exception_handler)
     app.add_exception_handler(Exception, generic_exception_handler)
 
-    # Mount health endpoint at root /health for container orchestrators
+    # 4. Mount health endpoint at root /health for container orchestrators
     app.include_router(health_router)
 
-    # Mount versioned API routes
+    # 5. Mount versioned API routes
     app.include_router(api_router, prefix=settings.API_PREFIX)
 
     return app

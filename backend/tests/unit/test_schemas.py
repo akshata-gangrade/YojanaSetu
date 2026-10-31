@@ -366,3 +366,54 @@ def test_scheme_chunk_schema() -> None:
             source_url="https://sample.gov.in",
             extra_field="unauthorized",
         )
+
+
+def test_all_request_models_enforce_extra_forbid() -> None:
+    """Verify every API request and input model enforces extra='forbid'."""
+    from app.schemas.admin import AdminUserBase, AdminUserCreate
+    from app.schemas.api import (
+        FeedbackResponse,
+        IntakeExtractRequest,
+        IntakeExtractResponse,
+        MatchRequest,
+        MatchResponse,
+        PaginatedSchemesResponse,
+        SchemeAskRequest,
+        SchemeAskResponse,
+        SchemeMatchItem,
+    )
+    from app.schemas.audit import AuditLogBase, AuditLogCreate
+    from app.schemas.chunk import SchemeChunkBase, SchemeChunkCreate
+    from app.schemas.feedback import FeedbackBase, FeedbackCreate
+    from app.schemas.scheme import SchemeBase, SchemeCreate, SchemeUpdate
+    from app.schemas.user_profile import UserProfile
+
+    request_models = [
+        IntakeExtractRequest,
+        MatchRequest,
+        SchemeAskRequest,
+        FeedbackCreate,
+        FeedbackBase,
+        UserProfile,
+        SchemeCreate,
+        SchemeBase,
+        SchemeUpdate,
+        AdminUserCreate,
+        AdminUserBase,
+        AuditLogCreate,
+        AuditLogBase,
+        SchemeChunkCreate,
+        SchemeChunkBase,
+        IntakeExtractResponse,
+        MatchResponse,
+        SchemeMatchItem,
+        PaginatedSchemesResponse,
+        SchemeAskResponse,
+        FeedbackResponse,
+    ]
+
+    for model in request_models:
+        extra_setting = model.model_config.get("extra")
+        assert (
+            extra_setting == "forbid"
+        ), f"Model {model.__name__} has extra='{extra_setting}', expected 'forbid'"
