@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     logger.info("Shutting down YojanaSetu API, closing DB connections...")
-    MongoDBManager.close_client()
+    await MongoDBManager.close_client()
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:

@@ -30,10 +30,21 @@ from app.core.config import Settings, get_settings  # noqa: E402
 from app.main import create_app  # noqa: E402
 
 
+@pytest.fixture(autouse=True)
+def isolate_settings_env(monkeypatch: pytest.MonkeyPatch):
+    """Isolate tests from ambient env variables and clear Settings cache."""
+    get_settings.cache_clear()
+    for field_name in Settings.model_fields.keys():
+        monkeypatch.delenv(field_name, raising=False)
+    yield
+    get_settings.cache_clear()
+
+
 @pytest.fixture
 def test_settings() -> Settings:
     """Return explicit Settings instance for testing."""
     return Settings(
+        _env_file=None,
         ENV="development",
         API_PREFIX="/api/v1",
         MONGODB_URI="mongodb://localhost:27017",
@@ -53,6 +64,7 @@ def test_settings() -> Settings:
         LLM_DAILY_CALL_CAP=1000,
         SIMILARITY_THRESHOLD=0.7,
         LOG_LEVEL="INFO",
+        INCLUDE_SAMPLE_SCHEMES=False,
     )
 
 

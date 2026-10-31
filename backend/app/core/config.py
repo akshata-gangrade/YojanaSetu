@@ -111,6 +111,10 @@ class Settings(BaseSettings):
         default="INFO",
         description="Standard log verbosity level.",
     )
+    INCLUDE_SAMPLE_SCHEMES: bool = Field(
+        default=False,
+        description="Whether public queries include fictional sample schemes.",
+    )
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod
@@ -128,6 +132,8 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "JWT_SECRET must be at least 32 characters long in production."
                 )
+            if self.INCLUDE_SAMPLE_SCHEMES is True:
+                raise ValueError("INCLUDE_SAMPLE_SCHEMES must be False in production.")
             # In production, OpenAPI documentation should be disabled by default
             # unless explicitly enabled in an authorized staging context.
             if self.ENABLE_DOCS is True:
