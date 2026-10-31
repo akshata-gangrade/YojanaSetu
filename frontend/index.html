@@ -2,12 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>YojanaSetu - Citizen Scheme Navigator</title>
+    <meta
+      name="description"
+      content="YojanaSetu - Independent, privacy first citizen navigation portal for Indian government welfare schemes."
+    />
+    <!-- Apply UI preferences before first paint to prevent flash -->
+    <script>
+      (function () {
+        try {
+          var contrast = localStorage.getItem('yojanasetu_contrast');
+          if (contrast === 'true') {
+            document.documentElement.setAttribute('data-contrast', 'high');
+          }
+          var textSize = localStorage.getItem('yojanasetu_text_size');
+          if (textSize) {
+            document.documentElement.setAttribute('data-text-size', textSize);
+          }
+          var lang = localStorage.getItem('yojanasetu_lang');
+          if (lang) {
+            document.documentElement.setAttribute('lang', lang);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <title>YojanaSetu | Citizen Scheme Navigator</title>
   </head>
-  <body class="flex min-h-screen flex-col bg-slate-50 text-slate-900 antialiased">
-    <div id="root" class="flex flex-1 flex-col"></div>
+  <body class="min-h-screen antialiased selection:bg-[#FF9933]/30">
+    <div id="root" class="flex min-h-screen flex-col"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

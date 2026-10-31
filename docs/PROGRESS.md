@@ -47,3 +47,141 @@
 - Implement Scheme Ingestion and Parsing module.
 - Implement Groq LLM integration for citizen intake parsing in Module 2.
 
+---
+
+## Module: Design System, UI/UX, and Logo (Frontend Shell)
+
+- **Status**: Completed
+- **Date**: 2026-10-31
+
+### What Was Built
+1. **Design Tokens & Theme Architecture**:
+   - Defined CSS variables in `frontend/src/styles/index.css` and mapped them to Tailwind CSS in `tailwind.config.js`:
+     - Navy `#0B2A5B` (headings, primary brand, header, footer).
+     - Saffron `#FF9933` (accents, highlights, borders, icons, large text).
+     - Dark Saffron `#9A4A00` (for small text on white backgrounds and light tints, ensuring WCAG 2.1 AA 4.5:1+ contrast).
+     - Green `#138808` (primary buttons, success, "Eligible" status).
+     - White `#FFFFFF`, page background `#F7F9FC`, borders `#D9E0EA`, primary text `#1A2433`, muted text `#55627A`.
+     - Status tokens: Eligible (green `#138808`), Maybe eligible (saffron `#9A4A00` on `#FFF4E5`), Not eligible (neutral grey `#475569` on `#F1F5F9` with reason text in `#B3261E`).
+   - High contrast mode support (`html[data-contrast="high"]`) and fluid typography scaling (`data-text-size="normal|large|xlarge"`).
+   - Automated mathematical test suite `src/styles/contrast.test.js` validating that all 13 color pairs satisfy WCAG 2.1 AA contrast requirements.
+
+2. **Self-Hosted Typography**:
+   - Integrated self-hosted Fontsource packages: `@fontsource/inter` (Latin) and `@fontsource/noto-sans-devanagari` (Hindi).
+   - Zero external calls or dependencies on Google Fonts CDN.
+   - Body line height 1.6, base minimum size 16px, fluid responsive scaling.
+
+3. **Inline SVG Logo & Favicon**:
+   - Implemented `Logo.jsx` with `mark` and `horizontal` variants.
+   - Design follows a concentric two-arch bridge motif (saffron outer arch, green inner arch, navy deck, and navy eligibility checkmark).
+   - Live text for "Yojana" (navy `#0B2A5B`) and "Setu" (green `#138808`), with tagline: *"Bridging people to the schemes they deserve."*
+   - Created standalone `public/favicon.svg` and updated `index.html`.
+
+4. **App Shell & Layout**:
+   - `UtilityBar.jsx`: Skip-to-content link, language toggle (`English` / `हिन्दी`), text-size controls (`A−`, `A`, `A+`), and high-contrast toggle.
+   - `Header.jsx`: Logo, accessible navigation links (`Home`, `Check Eligibility`, `Browse Schemes`, `About`), mobile responsive drawer, and tri-color saffron/white/green accent stripe.
+   - `Footer.jsx`: Institutional navy background, non-government disclaimer ("Not an official Government of India website"), zero data persistence guarantee, links to About, Privacy, and Terms, and last-updated verification date (*October 2026*).
+   - Max content width 1200px, 8px grid system, 12px card border radius, soft shadows.
+
+5. **Accessible Component Library (`frontend/src/components/ui/`)**:
+   - `Button`: Primary (#138808), secondary (#0B2A5B), outline, ghost, loading spinner (`aria-busy`), disabled state, and 44px minimum tap targets.
+   - `Card`: 12px radius, soft shadow, `#D9E0EA` border, with loading skeleton, error, and empty state rendering.
+   - `Badge`: Eligible, Maybe eligible, and Not eligible (with `#B3261E` reason display).
+   - `Alert`: Info, warning, error, success with `role="alert"`.
+   - `Stepper`: Multi-step indicator with `aria-current="step"` and keyboard support.
+   - `ChatBubble`: Conversational bubble with `aria-live="polite"`, timestamps, and animated typing indicator.
+   - `TextInput`: Accessible label, helper text, `#B3261E` error state, and 3px navy focus ring.
+   - `Checklist`: Document and criteria checklist with status indicators.
+   - `Tabs`: Keyboard-navigable tablist (`ArrowLeft`, `ArrowRight`, `Home`, `End`).
+   - `Skeleton`: Pulse loaders for cards, text lines, buttons, respecting `prefers-reduced-motion`.
+   - `Toast` & `useToast`: Accessible notification toasts with polite live announcements.
+   - `Modal`: Native HTML `<dialog>` with scroll containment (`overscroll-behavior: contain`) and ESC dismissal.
+   - `EmptyState` & `ErrorState`: High-clarity fallback components.
+
+6. **Routing & Placeholder Pages (`react-router-dom` & `react-i18next`)**:
+   - `/`: Clean Homepage with hero, single primary CTA, 3-step "How it works", and Trust & Privacy section.
+   - `/about`: Mission, independence declaration, and official sources disclaimer.
+   - `/privacy`: Zero-storage guarantee (no Aadhaar, PAN, phone, email, or bank details collected).
+   - `/terms`: Informational terms of service and external portal links.
+   - `/schemes`: Placeholder with `EmptyState` indicating directory will arrive with verified gazette data.
+   - `/check-eligibility`: Placeholder with `EmptyState` indicating questionnaire will arrive with verified rules.
+   - `/admin`: Placeholder titled "Admin sign-in (coming soon)" with `noindex, nofollow` robots meta tag and zero navigation links.
+   - `/design-system`: Full interactive showcase of all components, registered strictly when `import.meta.env.DEV` is true.
+   - `*`: 404 page with home navigation.
+
+7. **Refinements & Institutional Accuracy**:
+   - **Trust & Claim Precision**: Replaced "Official / Ministry-verified sources" with "Verified sources / Checked against official government sources" and "0 Bytes / Personal data stored" with "No personal data / Stored by us". Cleaned copy across `en.json`, `hi.json`, and components to prevent implying government endorsement or unprovable guarantees.
+   - **Hero Badge**: Standardized to `"100% Free • Privacy First • No Login Required"` without hyphens (Hindi: `"100% निःशुल्क • गोपनीयता पहले • लॉगिन ज़रूरी नहीं"`), removing unnecessary hyphens across the hero section.
+   - **Hero Subtitle Trust Line**: Replaced with exact verified wording:
+     - EN: *"Find the schemes you qualify for in minutes. We never ask for your name, Aadhaar, phone number, or bank details, and every scheme is checked against its official source."*
+     - HI: *"कुछ ही मिनटों में जानें कि आप किन योजनाओं के पात्र हैं। हम आपका नाम, आधार, फ़ोन नंबर या बैंक विवरण कभी नहीं माँगते, और हर योजना की जाँच उसके आधिकारिक स्रोत से की जाती है।"*
+   - **High Contrast Mode & Pre-Paint Flash Prevention**:
+     - Diagnosed that Tailwind arbitrary classes bypassed contrast variables without explicit `html[data-contrast="high"]` overrides.
+     - Defined a comprehensive high contrast token set under `html[data-contrast="high"]`: pure black text (`#000000`) on white (`#FFFFFF`), 2px solid black borders on cards, inputs, and buttons, underlined links, no tinted/translucent backgrounds, hero displayed as a solid black panel with white text, black buttons with white text, and 3px focus rings on all interactive elements.
+     - Differentiated status badges through distinct icons (`✓`, `?`, `✕`), explicit text labels, and border treatments (`solid`, `dashed`, `inverted solid`), meeting WCAG 1.4.1 (Use of Color).
+     - Synchronous inline `<script>` in `<head>` applies `data-contrast="high"` before initial DOM paint, preventing flash of low contrast.
+     - Added automated DOM unit test suite `src/styles/highContrast.test.js` verifying attribute toggling, token overrides, 21:1 black/white contrast, and `localStorage` privacy compliance.
+
+8. **High Contrast Fixes, Text Size Controls, and 360px Mobile Layout**:
+   - **Hero Trust Strip High-Contrast Fix**:
+     - Diagnosed cause of white block: `[class*='border-white/']` in `index.css` had erroneously set `background-color: #ffffff !important;` on the trust strip container inside the black hero panel, while all children had `color: #ffffff !important;` (white text on white background).
+     - Fixed by removing `border-white/` from background overrides, making `[data-hero-trust-strip]` explicitly transparent with a 2px solid white top border, and styling `[data-stat-icon]` with black backgrounds and 2px solid white borders.
+     - Enforced `stroke: currentColor` on all SVGs, ensuring the button arrow inherits black on the white primary button, and all trust icons inherit pure white on black.
+     - Added `[data-hero-arch]` and hid the decorative arch graphic in high contrast mode via `html[data-contrast='high'] [data-hero-arch] { display: none !important; }`.
+   - **Text Size Controls Replacement**:
+     - Replaced `A-`, `A`, `A+` controls with `A` (16px, default and selected on first load), `A+` (18px), and `A++` (20px).
+     - Marked the active button with `aria-pressed="true"`, stored the preference in `localStorage` under `yojanasetu_text_size`, and pre-painted via synchronous `<head>` script.
+     - Added automated unit tests in `highContrast.test.js` validating text size switching and persistence.
+   - **Utility Bar 360px Readability**:
+     - Replaced badge text with `"Independent informational project. Not an official Government of India website."` (Hindi: `"स्वतंत्र सूचनात्मक परियोजना। यह भारत सरकार की आधिकारिक वेबसाइट नहीं है।"`).
+     - Designed mobile-first layout using `flex-col sm:flex-row` and `break-words leading-relaxed text-[11px] sm:text-xs` so text wraps naturally across two legible lines on 360px screens without truncation.
+   - **Hero Trust Copy Update**:
+     - Item 1: `"Hindi and English / Choose your language"` (Hindi: `"हिन्दी और अंग्रेज़ी / अपनी भाषा चुनें"`).
+     - Item 2: `"No personal data stored / We keep none of your details"` (Hindi: `"कोई व्यक्तिगत डेटा संगृहीत नहीं / हम आपका कोई विवरण नहीं रखते"`).
+     - Item 3: `"Verified sources / Checked against official government sources"` (Hindi: `"सत्यापित स्रोत / आधिकारिक सरकारी स्रोतों से जाँचे गए"`).
+   - **Comprehensive Page Audit**:
+     - Audited and converted fixed color hexes (`#0B2A5B`, `#55627A`, `#1A2433`, `#D9E0EA`, etc.) across `Home`, `About`, `Privacy`, `Terms`, `Check Eligibility`, `Browse Schemes`, `Admin`, and `404` to semantic theme tokens, guaranteeing pure black-on-white / white-on-black contrast everywhere.
+
+9. **Single-Polarity High Contrast Mode Redesign (Pure Black on White)**:
+   - **Root Cause Analysis of Prior High Contrast Inversions**:
+     - The previous two-polarity design (inverted solid black hero banner with white text alongside white cards with black text) was prone to color collisions when arbitrary Tailwind utility classes (`border-white/10`, `bg-white/10`, `text-[#FF9933]`, `bg-white/20`) caused the hero badge to render as a white pill with invisible white text, the secondary button to show as a blank white box, and the trust tiles to show as empty white squares with missing icons.
+   - **New Architecture - Single Polarity Everywhere**:
+     - Enforced a single polarity (pure black `#000000` text on pure white `#FFFFFF` background) everywhere across the application: page, header, utility bar, hero section, cards, modals, inputs, and footer.
+     - Zero dark panels, zero inverted sections, zero translucent tints, and zero opacity below 1.
+     - Hero, cards, inputs, badges, icon tiles, and buttons receive a uniform `2px solid #000000` border.
+     - Primary action buttons: solid `#000000` background, pure `#FFFFFF` text, with SVG arrow icons styled via `currentColor` (`#FFFFFF`). Explicitly targeted via `[data-variant="primary"]`.
+     - Secondary, outline, and ghost buttons: `#FFFFFF` background, `#000000` text, and `2px solid #000000` border.
+     - Links: pure black and underlined with accessible text-underline-offset.
+     - Focus ring: `3px solid #000000` with a `2px` white offset (`outline-offset: 2px`).
+     - Removed gradients, box shadows, text shadows, translucency, background images, and decorative elements (decorative arch `[data-hero-arch]` and header tricolor accent line `[data-header-accent]` set to `display: none !important`).
+     - Status badges (Eligible, Maybe Eligible, Not Eligible): `#FFFFFF` background, `#000000` border and text, plus distinct status icons (`✓`, `?`, `✕`), border patterns (`solid`, `dashed`, `double`), and text labels (`data-badge-reason`).
+     - All SVG icons enforce `fill: currentColor` (or `fill: none` when stroked) and `stroke: currentColor`.
+   - **Unified Implementation Strategy**:
+     - Rather than patching individual components, implemented a single unified override block at the end of `src/styles/index.css` scoped to `[data-contrast="high"]`.
+     - Applied universal baseline rules (`background-color: #ffffff !important`, `color: #000000 !important`, `border-color: #000000 !important`, `box-shadow: none !important`), followed by clean, targeted exceptions for primary buttons, utility active buttons, and focus outlines.
+   - **Comprehensive Page Verification**:
+     - Verified all 8 core pages (`Home`, `About`, `Privacy`, `Terms`, `Check Eligibility`, `Browse Schemes`, `Admin`, and `404`) in high contrast mode:
+       - Confirmed via select-all (Ctrl+A) that zero text or icons are invisible.
+       - Hero badge renders with black text and border on white background.
+       - "Browse All Schemes" button renders as white button with black text and 2px black border.
+       - Three trust icon tiles render with white background, 2px black border, and visible black icons.
+       - Header, footer, modals, alerts, and inputs render with crisp black-on-white polarity.
+   - **Test & Accessibility Guarantees**:
+     - High contrast toggle in `UtilityBar` marked with `aria-pressed={highContrast}`.
+     - Synchronous `<head>` script in `index.html` prevents flash before first paint.
+     - Expanded unit test suite `src/styles/highContrast.test.js` to 8 tests verifying attribute toggling, `aria-pressed`, pre-paint DOM execution, 21:1 contrast ratio, primary button exceptions, and privacy storage invariants.
+
+### Decisions
+- Separated the Design System showcase into `/design-system` behind `import.meta.env.DEV` so production builds remain lightweight and clean.
+- Kept `BrowseSchemesPage` and `CheckEligibilityPage` as clean placeholders using `EmptyState` without any mock or fabricated scheme results, maintaining institutional integrity.
+- Admin page removed from all navigation and protected with an automated `noindex, nofollow` DOM meta tag effect.
+- Standardized high contrast mode on a single polarity (pure black on white) rather than inverted polarity blocks, eliminating any possibility of white-on-white text bugs.
+- UI preferences (`yojanasetu_lang`, `yojanasetu_text_size`, `yojanasetu_contrast`) are stored in `localStorage`, while citizen profiles remain transient in memory only.
+
+### Verification
+- **Vitest**: 30 tests passing across contrast calculations, text size scalability, high contrast DOM manipulation, i18n key parity, and validator security.
+- **ESLint**: 0 errors, 0 warnings.
+- **Prettier**: Clean formatting verification across all source files.
+- **Vite Build**: Production build passes with zero errors, bundling self-hosted fonts into `dist/`.
+
+

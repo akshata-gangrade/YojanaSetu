@@ -1,9 +1,327 @@
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/noto-sans-devanagari/400.css';
+@import '@fontsource/noto-sans-devanagari/500.css';
+@import '@fontsource/noto-sans-devanagari/600.css';
+@import '@fontsource/noto-sans-devanagari/700.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Brand Tokens */
+  --color-navy: #0b2a5b;
+  --color-navy-dark: #071c3d;
+  --color-navy-light: #163b75;
+  --color-saffron: #ff9933;
+  --color-saffron-dark: #9a4a00;
+  --color-saffron-light: #fff4e5;
+  --color-green: #138808;
+  --color-green-dark: #0e6606;
+  --color-green-light: #eaf5ea;
+
+  /* Surfaces & Neutral Tokens */
+  --color-page-bg: #f7f9fc;
+  --color-card-bg: #ffffff;
+  --color-border: #d9e0ea;
+  --color-border-subtle: #e8eef5;
+  --color-text-primary: #1a2433;
+  --color-text-muted: #55627a;
+
+  /* Status / Feedback Tokens */
+  --color-error: #b3261e;
+  --color-error-light: #fdf2f2;
+  --color-warning: #9a4a00;
+  --color-warning-light: #fff4e5;
+  --color-success: #138808;
+  --color-success-light: #eaf5ea;
+
+  /* Typography & Layout */
+  --font-base-size: 16px;
+  --font-line-height: 1.6;
+  --content-max-width: 1200px;
+  --card-radius: 12px;
+}
+
+/* High Contrast Mode Tokens: Single polarity black-on-white baseline */
+html[data-contrast='high'] {
+  --color-navy: #000000;
+  --color-navy-dark: #000000;
+  --color-navy-light: #000000;
+  --color-saffron: #000000;
+  --color-saffron-dark: #000000;
+  --color-saffron-light: #ffffff;
+  --color-green: #000000;
+  --color-green-dark: #000000;
+  --color-green-light: #ffffff;
+  --color-page-bg: #ffffff;
+  --color-card-bg: #ffffff;
+  --color-border: #000000;
+  --color-border-subtle: #000000;
+  --color-text-primary: #000000;
+  --color-text-muted: #000000;
+  --color-error: #000000;
+  --color-error-light: #ffffff;
+}
+
+/* Text Size Scalability */
+html[data-text-size='normal'] {
+  font-size: 16px;
+}
+html[data-text-size='large'] {
+  font-size: 18px;
+}
+html[data-text-size='xlarge'] {
+  font-size: 20px;
+}
+
 @layer base {
+  html {
+    font-size: var(--font-base-size);
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply font-sans;
+    font-family:
+      'Inter',
+      'Noto Sans Devanagari',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
+    line-height: var(--font-line-height);
+    background-color: var(--color-page-bg);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+  }
+
+  /* Accessible Visible 3px Navy Focus Ring */
+  *:focus-visible {
+    outline: 3px solid var(--color-navy, #0b2a5b) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* Headings inherit Navy brand color by default */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-navy);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  /* Native Dialog Scroll Containment (Modern Web Guidance) */
+  dialog:modal {
+    overscroll-behavior: contain;
+  }
+  dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+    background-color: rgba(11, 42, 91, 0.45);
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* ==========================================================================
+   High Contrast Mode: Universal Black-on-White (Single Polarity)
+   Scoped to [data-contrast="high"]
+   ========================================================================== */
+
+/* 1. Universal Baseline: Every element is pure black (#000000) on pure white (#FFFFFF) */
+[data-contrast='high'],
+[data-contrast='high'] * {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+}
+
+/* 2. Icons and SVGs: currentColor fill and stroke */
+[data-contrast='high'] svg {
+  color: inherit !important;
+}
+[data-contrast='high'] svg:not([fill='none']),
+[data-contrast='high'] svg *:not([fill='none']) {
+  fill: currentColor !important;
+}
+[data-contrast='high'] svg[fill='none'],
+[data-contrast='high'] svg *[fill='none'] {
+  fill: none !important;
+}
+[data-contrast='high'] svg[stroke],
+[data-contrast='high'] svg *[stroke] {
+  stroke: currentColor !important;
+}
+[data-contrast='high'] svg path {
+  border-color: transparent !important;
+}
+
+/* 3. 2px Solid Black Borders on Key Structural Elements */
+[data-contrast='high'] [data-hero],
+[data-contrast='high'] [data-card],
+[data-contrast='high'] [data-hero-badge],
+[data-contrast='high'] [data-stat-icon],
+[data-contrast='high'] [data-step-icon],
+[data-contrast='high'] [data-trust-icon],
+[data-contrast='high'] [data-404-badge],
+[data-contrast='high'] [data-footer-badge],
+[data-contrast='high'] [data-footer-privacy],
+[data-contrast='high'] [data-badge],
+[data-contrast='high'] [data-badge-reason],
+[data-contrast='high'] input,
+[data-contrast='high'] select,
+[data-contrast='high'] textarea,
+[data-contrast='high'] [data-text-input],
+[data-contrast='high'] button,
+[data-contrast='high'] [data-button],
+[data-contrast='high'] dialog,
+[data-contrast='high'] [role='alert'],
+[data-contrast='high'] [role='status'],
+[data-contrast='high'] header,
+[data-contrast='high'] [role='region'][aria-label*='display settings'],
+[data-contrast='high'] footer {
+  border: 2px solid #000000 !important;
+}
+
+/* Hero Trust Strip divider */
+[data-contrast='high'] [data-hero-trust-strip] {
+  border-top: 2px solid #000000 !important;
+}
+
+/* Badge dots and status indicators */
+[data-contrast='high'] [data-hero-badge] span:first-child,
+[data-contrast='high'] [data-footer-badge] span:first-child,
+[data-contrast='high']
+  [role='region'][aria-label*='display settings']
+  span[aria-hidden='true'] {
+  background-color: #000000 !important;
+}
+
+/* 4. Primary Button Exception: Solid black with pure white text and currentColor icon */
+[data-contrast='high'] [data-variant='primary'],
+[data-contrast='high'] button[data-variant='primary'],
+[data-contrast='high'] a[data-variant='primary'] {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #000000 !important;
+}
+[data-contrast='high'] [data-variant='primary'] *,
+[data-contrast='high'] button[data-variant='primary'] *,
+[data-contrast='high'] a[data-variant='primary'] * {
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+[data-contrast='high'] [data-variant='primary'] svg,
+[data-contrast='high'] button[data-variant='primary'] svg,
+[data-contrast='high'] a[data-variant='primary'] svg {
+  color: #ffffff !important;
+  stroke: currentColor !important;
+}
+
+/* Active buttons in utility controls (e.g. selected text size A / high contrast toggle) */
+[data-contrast='high']
+  [role='region'][aria-label*='display settings']
+  button[aria-pressed='true'] {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #000000 !important;
+  font-weight: 800 !important;
+}
+[data-contrast='high']
+  [role='region'][aria-label*='display settings']
+  button[aria-pressed='true']
+  * {
+  background-color: transparent !important;
+  color: #ffffff !important;
+}
+
+/* 5. Secondary, Outline, and Ghost Buttons: White background, black text, 2px black border */
+[data-contrast='high'] button:not([data-variant='primary']):not([aria-pressed='true']),
+[data-contrast='high']
+  [data-button]:not([data-variant='primary']):not([aria-pressed='true']) {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+[data-contrast='high'] button:not([data-variant='primary']):not([aria-pressed='true']) *,
+[data-contrast='high']
+  [data-button]:not([data-variant='primary']):not([aria-pressed='true'])
+  * {
+  background-color: transparent !important;
+  color: #000000 !important;
+  stroke: currentColor !important;
+}
+
+/* 6. Links: Black and Underlined */
+[data-contrast='high'] a {
+  color: #000000 !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  text-decoration-thickness: 1.5px !important;
+}
+[data-contrast='high'] a:hover {
+  text-decoration-thickness: 2.5px !important;
+}
+
+/* 7. Focus Ring: 3px solid black with a 2px white offset */
+[data-contrast='high'] *:focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: 2px !important;
+}
+
+/* 8. Status Badges: Distinct borders, icons, and text labels on white */
+[data-contrast='high'] [data-badge] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+[data-contrast='high'] [data-badge] * {
+  background-color: transparent !important;
+  color: #000000 !important;
+}
+[data-contrast='high'] [data-badge='eligible'] {
+  border: 2px solid #000000 !important;
+}
+[data-contrast='high'] [data-badge='maybe'] {
+  border: 2px dashed #000000 !important;
+}
+[data-contrast='high'] [data-badge='not-eligible'] {
+  border: 2px double #000000 !important;
+}
+[data-contrast='high'] [data-badge-reason] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700 !important;
+}
+
+/* 9. Hidden Decorative Elements in High Contrast */
+[data-contrast='high'] [data-hero-arch] {
+  display: none !important;
+}
+[data-contrast='high'] [data-header-accent] {
+  display: none !important;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

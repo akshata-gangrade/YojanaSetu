@@ -1,12 +1,160 @@
 {
-  "appTitle": "YojanaSetu",
-  "tagline": "AI-Powered Government Scheme Navigator",
-  "disclaimer": "Not an official Government of India website. YojanaSetu is an independent informational guide.",
-  "privacyNotice": "Zero personal data persisted. We never ask for or store Aadhaar, PAN, phone, email, or bank details.",
-  "describePrompt": "Describe your situation in plain English or Hindi...",
-  "checkEligibility": "Check Qualified Schemes",
-  "lastVerified": "Last verified against official source",
-  "officialSource": "Official Source",
-  "howToApply": "How to Apply",
-  "requiredDocuments": "Required Documents"
+  "common": {
+    "appName": "YojanaSetu",
+    "appTagline": "Bridging people to the schemes they deserve.",
+    "independentBadge": "Independent informational project. Not an official Government of India website.",
+    "officialDisclaimer": "Not an official Government of India website. YojanaSetu is an independent informational guide.",
+    "privacyGuarantee": "No personal data stored by us. We never ask for or store Aadhaar, PAN, phone number, email, or bank details.",
+    "lastUpdated": "October 2026",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Try Again",
+    "close": "Close",
+    "backToHome": "Back to Home",
+    "allRightsReserved": "Independent public information portal. Scheme criteria checked against central and state government guidelines."
+  },
+  "nav": {
+    "skipToContent": "Skip to main content",
+    "home": "Home",
+    "checkEligibility": "Check Eligibility",
+    "browseSchemes": "Browse Schemes",
+    "about": "About & Disclaimer",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "admin": "Admin",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu"
+  },
+  "utility": {
+    "textSize": "Text size",
+    "normalText": "Standard text size (A)",
+    "largeText": "Large text size (A+)",
+    "xlargeText": "Extra large text size (A++)",
+    "decreaseText": "Standard text size (A)",
+    "resetText": "Large text size (A+)",
+    "increaseText": "Extra large text size (A++)",
+    "highContrast": "High Contrast",
+    "toggleContrast": "Toggle high contrast mode",
+    "language": "Language",
+    "switchToHindi": "हिन्दी",
+    "switchToEnglish": "English"
+  },
+  "hero": {
+    "badge": "100% Free • Privacy First • No Login Required",
+    "title": "Bridging You to Government Schemes You Deserve",
+    "subtitle": "Find the schemes you qualify for in minutes. We never ask for your name, Aadhaar, phone number, or bank details, and every scheme is checked against its official source.",
+    "ctaPrimary": "Check Your Eligibility",
+    "ctaSecondary": "Browse All Schemes",
+    "stat1Value": "Hindi and English",
+    "stat1Label": "Choose your language",
+    "stat2Value": "No personal data stored",
+    "stat2Label": "We keep none of your details",
+    "stat3Value": "Verified sources",
+    "stat3Label": "Checked against official government sources"
+  },
+  "howItWorks": {
+    "title": "How YojanaSetu Works",
+    "subtitle": "Three simple, transparent steps to discover government benefits without paperwork hurdles.",
+    "step1Title": "1. Answer Simple Questions",
+    "step1Desc": "Tell us about your household, state, occupation, or category in plain language. No identity documents required.",
+    "step2Title": "2. Deterministic Eligibility Matching",
+    "step2Desc": "Our rule engine checks eligibility criteria and identifies schemes where you are eligible or may qualify.",
+    "step3Title": "3. Direct Official Portal Application",
+    "step3Desc": "Get verified links to official government portals (.gov.in / .nic.in) along with exact checklists of required documents."
+  },
+  "trust": {
+    "title": "Built on Trust, Privacy, and Verified Sources",
+    "subtitle": "Why citizens and advisors rely on YojanaSetu for scheme discovery.",
+    "card1Title": "Verified Sources",
+    "card1Desc": "Every scheme rule and criterion is checked directly against published central and state government gazettes and portals.",
+    "card2Title": "Privacy Preserving",
+    "card2Desc": "Your answers exist only in temporary browser memory. We never ask for or store Aadhaar numbers, phone numbers, or bank accounts.",
+    "card3Title": "Clear Qualification Reasons",
+    "card3Desc": "We clearly distinguish between Eligible, Maybe Eligible, and Not Eligible with plain-language explanations for each criterion."
+  },
+  "status": {
+    "eligible": "Eligible",
+    "maybeEligible": "Maybe Eligible",
+    "notEligible": "Not Eligible",
+    "reason": "Disqualification reason",
+    "verified": "Checked against official gazette"
+  },
+  "components": {
+    "buttonPrimary": "Primary Action",
+    "buttonSecondary": "Secondary Action",
+    "buttonGhost": "Ghost Action",
+    "loadingButton": "Processing...",
+    "inputPlaceholder": "Enter details here...",
+    "inputLabel": "Household State / Location",
+    "inputHelper": "Enter your state of permanent residence",
+    "inputError": "Please provide a valid state name",
+    "checklistTitle": "Required Documents Checklist",
+    "stepperStep1": "Citizen Profile",
+    "stepperStep2": "Eligibility Engine",
+    "stepperStep3": "Verified Results",
+    "chatBotName": "YojanaSetu Guide",
+    "chatUserMessage": "Can small farmers in Uttar Pradesh receive financial support for solar pumps?",
+    "chatBotMessage": "Yes, under PM-KUSUM Component B, farmers can get up to 60% subsidy on standalone solar water pumping systems.",
+    "toastSuccess": "Preferences saved successfully.",
+    "modalTitle": "Information Verification",
+    "modalDesc": "YojanaSetu is committed to providing factual, independent welfare scheme guidance.",
+    "emptyTitle": "No Schemes Found",
+    "emptyDesc": "No schemes match your current criteria. Try adjusting your filters or search keywords.",
+    "errorTitle": "Unable to Load Data",
+    "errorDesc": "A network or server error occurred while retrieving scheme information. Please try again."
+  },
+  "pages": {
+    "about": {
+      "title": "About YojanaSetu and Legal Disclaimer",
+      "subtitle": "Empowering citizens across India to access entitlements through transparent technology.",
+      "missionTitle": "Our Mission",
+      "missionText": "Millions of eligible citizens miss out on government welfare benefits due to fragmented information, complicated eligibility criteria, and lack of clear guidance. YojanaSetu ('Scheme Bridge') was built as an independent, transparent bridge connecting citizens directly to official schemes.",
+      "independenceTitle": "Independent Public Project",
+      "independenceText": "YojanaSetu is an independent project and is NOT affiliated with, sponsored by, or an official website of the Government of India or any state government. Official applications must always be completed on respective government portals ending in .gov.in or .nic.in.",
+      "accuracyTitle": "Information Accuracy and Sources",
+      "accuracyText": "All scheme criteria and summaries on YojanaSetu are cross-referenced against published government gazettes, guidelines, and portal documentation. However, government policies and budget allotments change periodically. Always verify with official authorities before applying."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "subtitle": "Your privacy is our foundational principle. We do not track, collect, or store personal identifiers.",
+      "noPiiTitle": "No Personal Data Collection",
+      "noPiiText": "We never ask for, collect, or store Aadhaar numbers, PAN cards, voter IDs, phone numbers, email addresses, names, or bank account details. Any temporary input provided during an eligibility check is processed solely in transient browser memory.",
+      "storageTitle": "What We Store Locally",
+      "storageText": "We only save your accessibility and interface preferences (selected language, text size preference, and high contrast toggle) in your browser's local storage. Your user queries and eligibility profiles are never saved to local storage or transmitted to analytics services.",
+      "cookiesTitle": "No Advertising or Tracking Cookies",
+      "cookiesText": "YojanaSetu uses no commercial tracking cookies, no third-party behavioral pixels, and no fingerprinting technologies."
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "subtitle": "Conditions of use for the YojanaSetu citizen portal.",
+      "infoTitle": "1. Informational Service Only",
+      "infoText": "YojanaSetu is an informational directory and eligibility guidance tool. It does not disburse funds, grant approvals, or accept government applications. Submission of welfare applications must be done through sanctioned government offices or websites.",
+      "liabilityTitle": "2. Limitation of Liability",
+      "liabilityText": "While we strive for absolute accuracy based on official government documentation, YojanaSetu and its contributors are not liable for any discrepancies, policy changes, rejected applications, or outcomes resulting from use of this information.",
+      "redirectTitle": "3. External Links to Government Portals",
+      "redirectText": "Links leading to external government websites (.gov.in, .nic.in) are provided for convenience. We do not control or endorse external third-party software."
+    },
+    "eligibilityPlaceholder": {
+      "title": "Check Your Scheme Eligibility",
+      "subtitle": "Determine your qualification for central and state welfare benefits.",
+      "emptyTitle": "Eligibility Questionnaire Arriving Soon",
+      "emptyDesc": "The deterministic citizen qualification questionnaire is currently being calibrated with official eligibility rules. It will launch with verified criteria from published guidelines without storing personal details."
+    },
+    "schemesPlaceholder": {
+      "title": "Browse Government Schemes",
+      "subtitle": "Comprehensive directory of central and state citizen welfare programs.",
+      "emptyTitle": "Scheme Directory Arriving Soon",
+      "emptyDesc": "The scheme directory is being indexed with verified guidelines and criteria checked against official government gazettes. Direct links to official portals will be available here."
+    },
+    "adminPlaceholder": {
+      "title": "Admin sign-in (coming soon)",
+      "subtitle": "Administrative governance access will be enabled in a future release.",
+      "notice": "Administrative authentication and rule management will be available here. This page is not indexed by public search engines."
+    },
+    "notFound": {
+      "title": "404 - Page Not Found",
+      "subtitle": "The page you are looking for does not exist or has been moved.",
+      "cta": "Return to Homepage"
+    }
+  }
 }
