@@ -1,5 +1,6 @@
 """Structured eligibility criteria models for deterministic rule evaluation."""
 
+from datetime import date
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -23,6 +24,10 @@ class Criterion(BaseModel):
     value: Any = Field(
         ...,
         description="Value or range against which the field is tested.",
+    )
+    as_on: date | None = Field(
+        default=None,
+        description="Optional cut-off date (YYYY-MM-DD) for age evaluation.",
     )
 
     @model_validator(mode="after")
@@ -80,4 +85,8 @@ class EligibilityCriteria(BaseModel):
     any_of: list[Criterion] = Field(
         default_factory=list,
         description="At least one criterion in list must be satisfied (if non-empty).",
+    )
+    as_on: date | None = Field(
+        default=None,
+        description="Optional cut-off date (YYYY-MM-DD) for criteria evaluation.",
     )

@@ -184,4 +184,169 @@
 - **Prettier**: Clean formatting verification across all source files.
 - **Vite Build**: Production build passes with zero errors, bundling self-hosted fonts into `dist/`.
 
+---
+
+## Module: Database Schema, Repositories, and MongoDB Data Layer
+
+- **Status**: Completed
+- **Date**: 2026-10-31
+
+### What Was Built
+1. **Pydantic Schemas (`backend/app/schemas/`)**:
+   - `enums.py`: `SchemeLevel`, `SchemeStatus`, `ChunkSection`, `AdminRole`, `FeedbackVote`, `CriterionField`, `CriterionOperator`, and complete Indian states and demographic enums (`Gender`, `IndianState`, `SocialCategory`, `Occupation`, `EducationLevel`, `ResidenceType`, `MaritalStatus`, `DisabilityStatus`).
+   - `criteria.py`: `Criterion` and `EligibilityCriteria` supporting deterministic operators (`eq`, `in`, `not_in`, `gte`, `lte`, `between`) with strict boundary and type validation.
+   - `user_profile.py`: `UserProfile` model with bounded numbers and strict enums (`extra="forbid"`), where omitted fields or `prefer_not_to_say` signify unknown criteria. Preserves zero persistence invariant.
+   - `scheme.py`: `SchemeBase`, `SchemeCreate`, `SchemeUpdate`, `Scheme` with slug regex, url protocol validation, and central/state level invariants.
+   - `chunk.py`: `SchemeChunkBase`, `SchemeChunkCreate`, `SchemeChunk` for vector search retrieval.
+   - `admin.py`: `AdminUserBase`, `AdminUserCreate`, `AdminUserInDB`, `AdminUser` with login attempt and lockout tracking.
+   - `audit.py`: `AuditLogBase`, `AuditLogCreate`, `AuditLog` immutable append-only models.
+   - `feedback.py`: `FeedbackBase`, `FeedbackCreate`, `Feedback` with 90-day TTL constraint and zero personal identifiers.
+
+2. **MongoDB Data Layer (`backend/app/db/`)**:
+   - `mongo.py`: Switched to PyMongo 4.9+ native `AsyncMongoClient` with shared connection pool, socket timeouts, and graceful asynchronous shutdown (`await aclose()`). Replaced deprecated Motor dependency.
+   - `indexes.py`: Implemented unique index on `schemes.slug`, compound index on `(status, state, level)`, unique index on `admin_users.email`, index on `scheme_chunks.scheme_id`, 90-day TTL index on `feedback.created_at`, reverse chronological index on `audit_logs`, and Atlas Vector Search index creation with asynchronous polling.
+
+3. **Repositories & Test Fakes (`backend/app/repositories/`)**:
+   - `base.py`: Protocol interfaces for `ISchemeRepository`, `IChunkRepository`, `IAdminRepository`, `IAuditRepository`, and `IFeedbackRepository`.
+   - `scheme_repo.py`: Whitelisted query building, strictly enforcing `status="verified"` and `is_sample=False` for production queries.
+   - `chunk_repo.py`: Chunk CRUD and Atlas Vector Search aggregation pipeline (`$vectorSearch`).
+   - `admin_repo.py`: Admin account lookups, failed login attempt tracking, and account lockouts.
+   - `audit_repo.py`: Append-only audit logger without delete/update mutations.
+   - `feedback_repo.py`: Anonymous helpfulness rating collection.
+   - `fakes.py`: High-speed in-memory fake repositories replicating database semantics for 100% test isolation.
+
+4. **Sample Seeding Script (`backend/scripts/seed_schemes.py`)**:
+   - 5 clearly labelled FICTIONAL sample schemes (`pm-yuva`, `kanya-shiksha`, `maha-solar`, `divyangjan-skills`, `up-vridha`) marked `is_sample: True`.
+   - CLI flags: `--confirm` strictly required to perform database writes; `--purge-samples` to clean up fictional test data.
+   - Completely isolated from automated test execution.
+
+5. **Test Suite & Verification**:
+   - 32 pytest tests passing across unit schemas, repositories, indexes, and health endpoints.
+   - Ruff and Black checks pass with 0 errors and 0 warnings.
+
+### Decisions
+- Replaced deprecated Motor driver with PyMongo 4.9+ native `AsyncMongoClient` across the application.
+- Structured `UserProfile` with `extra="forbid"` and helper methods (`is_field_unknown`, `get_effective_value`) ensuring no personal data can ever be ingested or persisted.
+- Isolated unit tests with `Fake*Repository` classes so tests execute instantly without requiring Atlas or network connectivity.
+- Implemented vector index creation in `indexes.py` behind an unexecuted function awaiting final embedding model confirmation.
+- Made `seed_schemes.py` strictly require an explicit `--confirm` flag, refusing to execute or seed any data automatically.
+
+### Assumptions
+- Database name is read from `MONGODB_DB` (default `yojanasetu`).
+- Target embedding model will output vectors with dimensionality matching `EMBEDDING_DIM` (384).
+
+### Open Issues / Next Steps
+- Create Atlas Vector Search index after hosted multilingual embedding model is final.
+- Implement Module: Deterministic Python Rule Engine over structured criteria.
+
+---
+
+## Follow-up: Data Layer Refinements & Live Standard Index Creation
+
+- **Status**: Completed
+- **Date**: 2026-10-31
+
+### What Was Built & Modified
+1. **PyMongo Driver Upgrade**:
+   - Upgraded `pymongo` to latest stable release on PyPI: `4.19.0`.
+   - Completely uninstalled deprecated `motor` package.
+   - Pinned `pymongo==4.19.0` in `backend/requirements.txt`.
+2. **Vector Index Definition Verification**:
+   - Verified that `create_vector_index()` in `backend/app/db/indexes.py` defines `"similarity": "cosine"`, uses `embedding_dim` parameter, targets `"path": "embedding"`, and declares both `"section"` and `"scheme_id"` as filter fields for metadata filtering. Left strictly unexecuted per instructions.
+3. **`INCLUDE_SAMPLE_SCHEMES` Setting & Invariants**:
+   - Added `INCLUDE_SAMPLE_SCHEMES: bool = False` to `Settings` in `backend/app/core/config.py`.
+   - Added fail-fast startup validator rejecting `INCLUDE_SAMPLE_SCHEMES=True` when `ENV="production"`.
+   - Updated `SchemeRepository` and `FakeSchemeRepository` (`get_verified_schemes` and `count_verified`) to evaluate `get_settings().INCLUDE_SAMPLE_SCHEMES` when `include_samples` is not passed.
+   - Documented in `backend/.env.example`, root `.env.example`, and referenced in `frontend/.env.example`.
+   - Added 3 unit tests verifying: default exclusion, development enablement, and production startup rejection.
+4. **Sample Purge Invariant Verification**:
+   - Added `test_purge_samples_preserves_real_schemes` confirming that `delete_sample_schemes()` deletes only `is_sample: True` schemes and preserves real schemes (`is_sample: False`) completely intact.
+5. **Standard Index Execution on Live Database**:
+   - Implemented idempotent `backend/scripts/create_indexes.py` printing verified indexes per collection.
+   - Executed against user's live database: created standard non-vector indexes across `schemes`, `admin_users`, `scheme_chunks`, `feedback`, and `audit_logs`.
+   - Vector index was omitted; zero documents inserted.
+
+### Verification
+- **Pytest**: 37 passed in 0.20s.
+- **Ruff**: All checks passed with 0 errors.
+- **Black**: Clean formatting verification across all source files.
+
+---
+
+## Follow-up: Settings Test Isolation & Ambient Environment Stripping
+
+- **Status**: Completed
+- **Date**: 2026-10-31
+
+### What Was Built & Modified
+1. **Settings Constructor Isolation**:
+   - Passed `_env_file=None` in all test calls instantiating `Settings(...)` across `tests/unit/test_config.py` and `tests/conftest.py` so tests never load local `.env` files.
+2. **Conftest Autouse Isolation Fixture**:
+   - Added `isolate_settings_env` autouse fixture in `tests/conftest.py` using `monkeypatch` to delete all environment variables matching `Settings.model_fields.keys()` and calling `get_settings.cache_clear()` before and after every test.
+3. **Environment Isolation Proof Test**:
+   - Added `test_settings_isolated_from_process_environment` in `tests/unit/test_config.py` proving that even when `INCLUDE_SAMPLE_SCHEMES=true` exists in the local environment, `Settings(_env_file=None)` evaluates cleanly to `False` without influence from local files or ambient state.
+4. **Test Suite Isolation Audit**:
+   - Fixed `test_indexes.py` to use `test_settings` fixture rather than calling bare `get_settings()`.
+   - Updated `FakeSchemeRepository` to take `include_sample_schemes: bool = False` by default for 100% deterministic test isolation.
+
+---
+
+## Module: Deterministic Rule Engine & Follow-up Selector
+
+- **Status**: Completed
+- **Date**: 2026-10-31
+
+### What Was Built & Modified
+1. **Deterministic Rule Engine (`backend/app/services/rule_engine.py`)**:
+   - Implemented `RuleEngineService`, pure Python engine with zero database, network, LLM, or randomness dependencies.
+   - Built three-valued logic system (`ThreeValuedLogic`: `TRUE`, `FALSE`, `UNKNOWN`):
+     - Missing or `prefer_not_to_say` fields evaluate strictly to `UNKNOWN`, never `FALSE`.
+     - In `all_of`: any condition evaluating to `FALSE` yields `not_eligible`; otherwise any `UNKNOWN` condition yields `maybe`; otherwise `eligible`.
+     - In `any_of`: any condition evaluating to `TRUE` satisfies the block; all conditions evaluating to `FALSE` fails the block; otherwise `UNKNOWN`.
+     - In combined conjunction (`all_of` AND `any_of`), one failed condition deterministically beats unknowns (`not_eligible`).
+   - Exact boundary value enforcement across all operators (`eq`, `in`, `not_in`, `gte`, `lte`, `between`).
+   - Age "as on" cut-off date evaluation with mathematical precision using user DOB or age windows.
+   - Bilingual reason generation in English and Hindi from deterministic templates without LLM involvement (e.g. `"Age 18 to 30: your age is 22 ✓"`, `"आयु 18 से 30: आपकी आयु 22 है ✓"`).
+   - Fast state and level pre-filtering (`prefilter_schemes` and `evaluate_scheme`): central schemes apply nationwide; state schemes mismatching citizen domicile are disqualified or pre-filtered.
+   - Defensive validation raising clear errors on malformed criteria, invalid operators, or incompatible types.
+
+2. **Follow-up Question Selector (`backend/app/services/followup_selector.py`)**:
+   - Implemented `FollowupSelectorService` to resolve citizen qualification ambiguity across candidate "maybe" schemes.
+   - Frequency-based ranking: finds the single missing field appearing in the most candidate schemes.
+   - Deterministic tie-breaking: ties broken strictly by `FIELD_PRIORITY_ORDER` (`age` > `annual_income` > `state` > `gender` > `occupation` > `social_category` > `residence_type` > `education_level` > `marital_status` > `disability_status` > `is_student`).
+   - Generates plain-language clarification questions in English and Hindi for all standard profile attributes.
+   - Automatically filters out already-answered profile attributes and returns `None` when candidate set is empty or unambiguous.
+
+3. **Schema Refinements (`backend/app/schemas/`)**:
+   - `criteria.py`: Tightened `as_on` typing to `date | None` (removed string unions and custom validators); Pydantic v2 automatically coerces ISO date strings like `"2026-01-01"` to `date` and rejects malformed strings with `ValidationError`.
+   - `user_profile.py`: Completely removed `dob` field, its validator, and all associated branches across `is_field_unknown` and `get_effective_value`. Date of birth is not collected, ensuring strictly minimal citizen data collection.
+
+4. **Age Cut-off Evaluation from Age Alone**:
+   - `rule_engine.py`: Removed `_calculate_exact_age_on_date` and the `dob` branch. Implemented `_compute_possible_age_range_at_cutoff`, which determines the possible completed age interval on the cut-off date from current age alone.
+   - Evaluates the condition across the entire possible range: returns True if whole range passes, False if whole range fails, and Unknown (resulting in "maybe") if the range straddles the boundary. Tested for both past and future cut-off dates across all 3 cases.
+
+5. **Test Suite & Tooling**:
+   - Added `pytest-timeout==2.3.1` and `pytest-cov==6.0.0` to `backend/requirements-dev.txt`.
+   - Configured `timeout = 10` in `backend/pyproject.toml`.
+   - Added 60 comprehensive unit tests in `backend/tests/unit/test_rule_engine.py` (48 tests) and `backend/tests/unit/test_followup_selector.py` (12 tests).
+   - Reached **97% line coverage** on `app.services.rule_engine` (surpassing 95% threshold).
+   - Verified that `findstr /s /i /n "dob" app\*.py tests\*.py` returns zero matches across the entire codebase.
+   - Black and Ruff formatting and linting pass with 0 errors across `app`, `tests`, and `scripts`.
+
+### Decisions
+- Structured `EligibilityResult` with bilingual collections (`passed_conditions_en`, `passed_conditions_hi`, `failed_conditions_en`, `failed_conditions_hi`) while honoring requested `lang` in default `passed_conditions` and `failed_conditions`.
+- Kept all reason generation purely templated to enforce zero hallucination and complete auditability.
+- Pre-filtering preserves all schemes when citizen state is unknown, ensuring potential state scheme matches are never prematurely discarded.
+
+### Assumptions
+- Input profile has passed Pydantic validation before being passed to rule evaluation.
+- Dates follow ISO 8601 formatting (`YYYY-MM-DD`).
+
+### Open Issues / Next Steps
+- Integrate `RuleEngineService` and `FollowupSelectorService` into the `/api/v1/match` endpoint and conversational intake flow.
+
+
+
+
+
 

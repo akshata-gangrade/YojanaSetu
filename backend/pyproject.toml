@@ -48,5 +48,11 @@ python_files = ["test_*.py"]
 python_functions = ["test_*"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+timeout = 10
 addopts = "-v --strict-markers"
+
+[tool.coverage.run]
+source = ["app.services.rule_engine"]
+
+
 
