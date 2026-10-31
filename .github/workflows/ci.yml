@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-lint-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run Ruff check
+        run: ruff check .
+
+      - name: Run Black check
+        run: black --check .
+
+      - name: Run Pytest
+        run: pytest
+        env:
+          ENV: development
+          API_PREFIX: /api/v1
+          MONGODB_URI: mongodb://localhost:27017
+          MONGODB_DB: yojanasetu_test
+          GROQ_API_KEY: gsk_dummy_key_for_testing_purposes_only
+          GROQ_MODEL: llama-3.3-70b-versatile
+          EMBEDDING_PROVIDER: hosted
+          EMBEDDING_API_KEY: dummy_embedding_key
+          EMBEDDING_MODEL: hosted-multilingual-e5
+          EMBEDDING_DIM: 384
+          JWT_SECRET: default_dev_jwt_secret_must_be_32_chars_long
+          JWT_ISSUER: yojanasetu
+          ACCESS_TOKEN_MINUTES: 60
+          ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+          ENABLE_DOCS: true
+          RATE_LIMIT_PER_MINUTE: 60
+          LLM_DAILY_CALL_CAP: 1000
+          SIMILARITY_THRESHOLD: 0.7
+          LOG_LEVEL: INFO
+
+  frontend-lint-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check Prettier
+        run: npm run format:check
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+

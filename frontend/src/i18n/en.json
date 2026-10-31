@@ -1,0 +1,12 @@
+{
+  "appTitle": "YojanaSetu",
+  "tagline": "AI-Powered Government Scheme Navigator",
+  "disclaimer": "Not an official Government of India website. YojanaSetu is an independent informational guide.",
+  "privacyNotice": "Zero personal data persisted. We never ask for or store Aadhaar, PAN, phone, email, or bank details.",
+  "describePrompt": "Describe your situation in plain English or Hindi...",
+  "checkEligibility": "Check Qualified Schemes",
+  "lastVerified": "Last verified against official source",
+  "officialSource": "Official Source",
+  "howToApply": "How to Apply",
+  "requiredDocuments": "Required Documents"
+}

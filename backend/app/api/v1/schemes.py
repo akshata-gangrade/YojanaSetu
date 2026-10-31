@@ -1,0 +1,5 @@
+"""Schemes discovery and detail router serving verified government schemes."""
+
+from fastapi import APIRouter
+
+router = APIRouter(prefix="/schemes", tags=["Schemes"])
