@@ -325,3 +325,60 @@ html[data-text-size='xlarge'] {
     scroll-behavior: auto !important;
   }
 }
+
+/* Print-friendly styles for scheme details and results */
+@media print {
+  /* Hide non-document chrome elements */
+  header,
+  footer,
+  [data-contrast-root] > header,
+  [data-contrast-root] > footer,
+  [role='region'][aria-label*='accessibility'],
+  [role='search'],
+  nav,
+  button,
+  [data-button],
+  [data-ask-box],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Reset layout for clean paper printing */
+  body,
+  main,
+  #main-content {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  /* Retain visible borders and crisp text */
+  article,
+  section,
+  div,
+  ol,
+  ul {
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure disclaimer strip is prominent in print */
+  [data-disclaimer-strip] {
+    display: block !important;
+    border: 1.5px solid #000000 !important;
+    background-color: #f8f9fa !important;
+    color: #000000 !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Ensure URLs are displayed clearly after links if desired or retain plain text */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #333333;
+  }
+}
+

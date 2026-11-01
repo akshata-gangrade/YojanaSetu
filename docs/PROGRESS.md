@@ -487,3 +487,77 @@
 
 ### Open Issues / Next Steps
 - Implement Admin authentication, dashboard, and scheme verification workflows.
+
+
+---
+
+## Module: Frontend Features (Part A - API Client, Browse Schemes & Scheme Detail)
+
+- **Status**: Completed
+- **Date**: 2026-11-01
+
+### What Was Built & Modified
+1. **Centralized API Client (`frontend/src/lib/api.js`)**:
+   - Single source of truth reading base URL exclusively from `VITE_API_BASE_URL` and appending `/api/v1`.
+   - Injects current active UI language (`i18n.language`) when not explicitly overridden.
+   - Built 6000ms watchdog timer firing `onSlow` callback to alert users of Render cold starts (*"Waking up the server, this can take up to a minute"*).
+   - Structured error handling via `ApiError` class with HTTP status, code, details, and request ID. Friendly fallbacks for 404, 413, 429 (*"Too many requests, please wait a minute"*), 503, and network disconnects.
+   - Exact query parameter matching: `getSchemes` constructs `skip`, `limit`, `state` (lowercased), `level`, and `category`.
+   - Comprehensive test suite in `frontend/src/lib/api.test.js` (10 tests passing).
+
+2. **Official Government Domain Validator (`frontend/src/lib/urlHelper.js` & `GovLink.jsx`)**:
+   - `isOfficialGovDomain(url)`: Strictly validates that the host ends in `.gov.in` or `.nic.in` (case-insensitive, ignoring trailing dots).
+   - Rejects URLs containing user credentials (`user:pass@host`), non-http/https protocols, and lookalikes (`evil-gov.in.com`, `gov.in.evil.com`, `fakegov.in`).
+   - `GovLink` component: Safely opens in new tab with `rel="noopener noreferrer"` for allowlisted domains; renders safe plain text otherwise.
+   - Unit tests in `frontend/src/lib/urlHelper.test.js` (7 tests passing).
+
+3. **Browse Schemes Page (`/schemes`)**:
+   - `BrowseSchemesPage.jsx`: Connects to real `GET /api/v1/schemes` with pagination and filters.
+   - `SchemeCard.jsx`: Displays localized name, level badge, state badge, sample data badge (when `is_sample: true`), category tags, benefit summary, verified date, and view details button.
+   - `SchemeFilters.jsx`: Filter controls for administrative level (`central`, `state`), all 36 Indian states & UTs, and category tag search.
+   - State handling: 4-card loading skeletons, `ErrorState` with retry, `EmptyState` explaining verified schemes review process, and slow server notice.
+
+4. **Scheme Detail Page (`/schemes/:slug`)**:
+   - `SchemeDetailPage.jsx` & `SchemeDetail.jsx`:
+     - Displays mandatory indicative disclaimer strip: *"Indicative information. The concerned department makes the final decision."*
+     - Localized scheme title, level badge, state badge, last verified date, and administrator verification name.
+     - Benefit summary callout card.
+     - Human-readable eligibility criteria list (evaluating `all_of` and `any_of`).
+     - Required documents checklist with interactive checkboxes whose tick state is preserved strictly in React memory (`useState`), never persisted to storage.
+     - Numbered application steps (`application_steps`).
+     - Official application portal and source links secured through `GovLink`.
+     - Print-friendly layout with `@media print` styles and a *"Print this page / PDF"* button (`window.print()`, avoiding jsPDF).
+     - 404 Not Found state with clear navigation back to the directory.
+
+5. **"Ask About This Scheme" Box (`frontend/src/features/scheme/components/SchemeAskBox.jsx`)**:
+   - Text input capped at 500 characters with live character counter.
+   - Calls `POST /api/v1/schemes/{slug}/ask` with question and active locale.
+   - Displays official guideline answer with citations when `answerable: true`.
+   - Displays friendly notice when `answerable: false` indicating information is not found in retrieved official text.
+   - Handles rate limits (429) with advisory notice.
+
+6. **React Error Boundary & Code Splitting (`frontend/src/app/App.jsx`)**:
+   - Created `ErrorBoundary.jsx` catching unhandled render errors with accessible fallback and reload options.
+   - Converted all routes to `React.lazy` with `<Suspense>` skeleton fallbacks.
+   - Registered `/schemes/:slug` route for `SchemeDetailPage`.
+
+7. **Internationalization (`frontend/src/i18n/en.json` & `hi.json`)**:
+   - Added full bilingual keys across `schemes`, `schemeDetail`, `ask`, `apiErrors`, and `criteria` with 100% key parity verified by `i18n.test.js`.
+
+8. **Environment Configuration**:
+   - Rewrote `frontend/.env.example` to contain only `VITE_API_BASE_URL` with a one-line comment and value `http://127.0.0.1:8000`.
+
+### Decisions
+- Separated `urlHelper.js` (pure JS domain validator) from `GovLink.jsx` (React UI component) to keep JS utilities purely functional without JSX syntax in `.js` files.
+- Kept document checklist tick state strictly in local React `useState` to adhere to zero-PII and zero-persistence principles.
+- Filtered state parameter to lowercase and verified exact parameter names `skip`, `limit`, `state`, `level`, and `category` as defined in `schemes.py`.
+
+### Assumptions
+- Indian states dropdown values match backend `IndianState` enum strings.
+- Frontend test runner expects `@testing-library/react` and `@testing-library/jest-dom` installed in `frontend/node_modules`.
+
+### Hindi Copy Review Notes (For User Verification)
+- "संकेतात्मक जानकारी। अंतिम निर्णय संबंधित विभाग करता है।" (Indicative information. The concerned department makes the final decision.)
+- "सर्वर सक्रिय हो रहा है, इसमें एक मिनट तक का समय लग सकता है" (Waking up the server, this can take up to a minute)
+- "सत्यापित योजनाएं यहाँ प्रदर्शित होंगी" (Verified schemes will appear here)
+- "उद्धृत आधिकारिक संदर्भ" (Retrieved official citations)

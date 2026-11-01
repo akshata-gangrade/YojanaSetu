@@ -1,5 +1,3 @@
-import { fetchApi } from '../../../lib/api';
+import { getSchemes, getSchemeBySlug, askSchemeQuestion, ApiError } from '../../../lib/api';
 
-export async function getScheme(slug) {
-  return fetchApi(`/api/v1/schemes/${slug}`);
-}
+export { getSchemes, getSchemeBySlug, askSchemeQuestion, ApiError };
