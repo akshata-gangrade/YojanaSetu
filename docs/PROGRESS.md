@@ -637,3 +637,61 @@
 - "मेरी पात्र योजनाएं देखें" (See my matching schemes)
 - "+ यह विवरण जोड़ें" (+ Add this detail)
 - "स्मृति में कोई प्रोफ़ाइल नहीं है" (No profile in memory)
+
+---
+
+## Module: Admin Panel and Authentication (Backend - Part A)
+
+- **Status**: Completed
+- **Date**: 2026-11-01
+
+### What Was Built
+1. **Argon2id Password Authentication & Side-Channel Defense (`app/core/auth.py`)**:
+   - Integrated `argon2-cffi` using `argon2.PasswordHasher` directly (defaulting to Argon2id) without legacy `passlib` wrappers.
+   - Constant-time side-channel protection with precomputed dummy Argon2id hash verification for unregistered email accounts to prevent user enumeration via timing differentials.
+   - Generic authentication error message strictly identical for unknown email and wrong password.
+   - 15-minute account lockout triggered after 5 consecutive failed login attempts.
+   - Heavy rate-limiting (5 requests/minute per client IP) on `POST /api/v1/admin/auth/login`.
+
+2. **Fixed Server-Side HS256 JWT Token Management (`app/core/auth.py`)**:
+   - Fixed HS256 algorithm enforcement on server side (algorithm header is strictly ignored and forced to HS256).
+   - Generated tokens carry mandatory claims: `sub`, `role`, `iat`, `exp`, `iss`, and `jti`.
+   - Token lifespan capped at a maximum of 30 minutes (between 15 and 30 minutes).
+   - Strict token parsing via `Authorization: Bearer <token>` header exclusively; zero use of cookies.
+   - Rejection with 401 Unauthorized on missing, malformed, expired, tampered, or `alg=none` tokens.
+
+3. **Role-Based Authorization & Dependency Injection (`app/api/deps.py`)**:
+   - `get_current_admin`: Verifies bearer token, checks account lockout, and loads admin entity.
+   - `require_admin_role`: Role guard enforcing full `admin` permissions (rejects `reviewer` with 403 Forbidden).
+   - Role boundaries:
+     - `admin`: Full administrative access (can manage, verify, reject, archive, and read audit logs).
+     - `reviewer`: Limited access (can list, view, create, edit, verify, reject, upload PDFs, and trigger ingestion, but strictly forbidden from archiving schemes or viewing audit logs).
+
+4. **Administrative Routes (`app/api/v1/admin.py`)**:
+   - `POST /api/v1/admin/auth/login`: Argon2id verification with rate limiting and lockout.
+   - `GET /api/v1/admin/schemes`: Paginated list of schemes with status filtering and search.
+   - `GET /api/v1/admin/schemes/{identifier}`: Scheme lookup by slug or document ID.
+   - `POST /api/v1/admin/schemes`: Create scheme (always saved as `needs_review`, criteria validated against `EligibilityCriteria`, `source_url` and `apply_url` strictly require HTTPS on `.gov.in` or `.nic.in` domains).
+   - `PUT` / `PATCH /api/v1/admin/schemes/{identifier}`: Edit scheme (any edit to a `verified` scheme resets it to `needs_review`).
+   - `POST /api/v1/admin/schemes/{identifier}/verify`: Verify scheme (requires valid `source_url` and `last_verified` date; records `verified_by` and `verified_at`).
+   - `POST /api/v1/admin/schemes/{identifier}/reject`: Reject scheme (requires non-empty explanation reason; reverts status to `draft`).
+   - `POST /api/v1/admin/schemes/{identifier}/archive`: Archive scheme (restricted to `admin` role).
+   - `POST /api/v1/admin/schemes/upload-pdf`: Upload PDF and compute SHA-256 source hash.
+   - `POST /api/v1/admin/schemes/{identifier}/ingest`: Trigger ingestion pipeline for a scheme.
+   - `GET /api/v1/admin/audit-logs`: Paginated read of immutable audit trail (restricted to `admin` role).
+
+5. **Immutable Audit Logging (`app/repositories/audit_repo.py`)**:
+   - Append-only audit trail logging for all mutations with `actor`, `action`, `target`, and `diff`.
+   - Invariant: Zero logging of passwords, password hashes, tokens, or `JWT_SECRET`.
+
+6. **Interactive Initial Admin Seeding Script (`scripts/seed_admin.py`)**:
+   - Command-line utility using `getpass` to prompt for email and password at run time.
+   - Enforces minimum 14-character password length.
+   - Hashes password using Argon2id directly.
+   - Refuses to execute if any administrator account already exists.
+   - Zero hardcoded default credentials anywhere in codebase.
+
+7. **Test Coverage (`tests/api/test_admin.py` & `tests/unit/test_seed_admin.py`)**:
+   - 16 new automated test cases covering login, lockout, rate limiting, token tampering/expiry/alg=none, reviewer vs admin role separation, verified scheme resetting on edit, public API visibility invariants, and seeding script guards.
+   - Total backend test suite: 203 passing tests.
+
