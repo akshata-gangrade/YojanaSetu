@@ -57,3 +57,7 @@ class AdminRepository:
             {"$set": {"failed_logins": 0, "locked_until": None}},
         )
         return result.modified_count > 0
+
+    async def count_admins(self) -> int:
+        """Count total registered administrator accounts."""
+        return await self.collection.count_documents({})

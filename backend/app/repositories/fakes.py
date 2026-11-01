@@ -26,6 +26,62 @@ class FakeSchemeRepository:
             return None
         return Scheme.model_validate(data)
 
+    async def get_by_id_or_slug(self, identifier: str) -> Scheme | None:
+        clean = identifier.strip()
+        for s in self._schemes.values():
+            if s.get("id") == clean or s.get("slug") == clean:
+                return Scheme.model_validate(s)
+        return None
+
+    async def get_admin_schemes(
+        self,
+        status: SchemeStatus | None = None,
+        search: str | None = None,
+        skip: int = 0,
+        limit: int = 50,
+    ) -> list[Scheme]:
+        results: list[dict[str, Any]] = []
+        for s in self._schemes.values():
+            if status is not None:
+                stat_val = (
+                    status.value if isinstance(status, SchemeStatus) else str(status)
+                )
+                if s.get("status") != stat_val:
+                    continue
+            if search:
+                term = search.strip().lower()
+                name = s.get("name", "").lower()
+                name_hi = s.get("name_hi", "").lower()
+                slug = s.get("slug", "").lower()
+                if term not in name and term not in name_hi and term not in slug:
+                    continue
+            results.append(s)
+        results.sort(key=lambda x: str(x.get("updated_at", "")), reverse=True)
+        return [Scheme.model_validate(r) for r in results[skip : skip + limit]]
+
+    async def count_admin_schemes(
+        self,
+        status: SchemeStatus | None = None,
+        search: str | None = None,
+    ) -> int:
+        count = 0
+        for s in self._schemes.values():
+            if status is not None:
+                stat_val = (
+                    status.value if isinstance(status, SchemeStatus) else str(status)
+                )
+                if s.get("status") != stat_val:
+                    continue
+            if search:
+                term = search.strip().lower()
+                name = s.get("name", "").lower()
+                name_hi = s.get("name_hi", "").lower()
+                slug = s.get("slug", "").lower()
+                if term not in name and term not in name_hi and term not in slug:
+                    continue
+            count += 1
+        return count
+
     async def get_verified_schemes(
         self,
         skip: int = 0,
@@ -211,6 +267,9 @@ class FakeAdminRepository:
         self._admins[clean]["locked_until"] = None
         return True
 
+    async def count_admins(self) -> int:
+        return len(self._admins)
+
 
 class FakeAuditRepository:
     """In-memory fake append-only audit repository."""
@@ -241,6 +300,25 @@ class FakeAuditRepository:
         matched = [entry for entry in self._logs if entry["target"] == clean_target]
         matched.sort(key=lambda x: x["timestamp"], reverse=True)
         return [AuditLog.model_validate(entry) for entry in matched[:limit]]
+
+    async def get_logs(
+        self, skip: int = 0, limit: int = 50, target: str | None = None
+    ) -> list[AuditLog]:
+        matched = self._logs
+        if target:
+            clean_target = target.strip()
+            matched = [entry for entry in matched if entry["target"] == clean_target]
+        sorted_logs = sorted(matched, key=lambda x: x["timestamp"], reverse=True)
+        return [
+            AuditLog.model_validate(entry)
+            for entry in sorted_logs[skip : skip + limit]
+        ]
+
+    async def count_logs(self, target: str | None = None) -> int:
+        if target:
+            clean_target = target.strip()
+            return sum(1 for entry in self._logs if entry["target"] == clean_target)
+        return len(self._logs)
 
 
 class FakeFeedbackRepository:

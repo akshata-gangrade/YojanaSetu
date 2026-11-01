@@ -73,6 +73,18 @@ class UnauthorizedError(AppException):
         )
 
 
+class ForbiddenError(AppException):
+    """Raised when authenticated user lacks required administrative privileges."""
+
+    def __init__(self, message: str = "Access forbidden", details: Any = None):
+        super().__init__(
+            message=message,
+            code="FORBIDDEN",
+            status_code=status.HTTP_403_FORBIDDEN,
+            details=details,
+        )
+
+
 class RateLimitExceededError(AppException):
     """Raised when client exceeds designated request rate limits."""
 

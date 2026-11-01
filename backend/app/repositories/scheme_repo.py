@@ -66,6 +66,78 @@ class SchemeRepository:
             return None
         return self._doc_to_scheme(doc)
 
+    async def get_by_id_or_slug(self, identifier: str) -> Scheme | None:
+        """Fetch single scheme by unique slug or MongoDB identifier."""
+        clean_id = str(identifier).strip()
+        doc = None
+        try:
+            if len(clean_id) == 24:
+                from bson import ObjectId
+
+                doc = await self.collection.find_one({"_id": ObjectId(clean_id)})
+        except Exception:
+            doc = None
+        if not doc:
+            doc = await self.collection.find_one({"slug": clean_id})
+        if not doc:
+            return None
+        return self._doc_to_scheme(doc)
+
+    async def get_admin_schemes(
+        self,
+        status: SchemeStatus | None = None,
+        search: str | None = None,
+        skip: int = 0,
+        limit: int = 50,
+    ) -> list[Scheme]:
+        """Fetch paginated schemes for admin view with optional status filter and text search."""
+        bounded_skip = max(0, skip)
+        bounded_limit = max(1, min(limit, 100))
+        query: dict[str, Any] = {}
+        if status is not None:
+            query["status"] = (
+                status.value if isinstance(status, SchemeStatus) else str(status)
+            )
+        if search:
+            import re
+
+            clean_search = re.escape(search.strip())
+            query["$or"] = [
+                {"name": {"$regex": clean_search, "$options": "i"}},
+                {"name_hi": {"$regex": clean_search, "$options": "i"}},
+                {"slug": {"$regex": clean_search, "$options": "i"}},
+            ]
+        cursor = (
+            self.collection.find(query)
+            .sort("updated_at", -1)
+            .skip(bounded_skip)
+            .limit(bounded_limit)
+        )
+        docs = await cursor.to_list(length=bounded_limit)
+        return [self._doc_to_scheme(d) for d in docs]
+
+    async def count_admin_schemes(
+        self,
+        status: SchemeStatus | None = None,
+        search: str | None = None,
+    ) -> int:
+        """Count schemes matching admin filters."""
+        query: dict[str, Any] = {}
+        if status is not None:
+            query["status"] = (
+                status.value if isinstance(status, SchemeStatus) else str(status)
+            )
+        if search:
+            import re
+
+            clean_search = re.escape(search.strip())
+            query["$or"] = [
+                {"name": {"$regex": clean_search, "$options": "i"}},
+                {"name_hi": {"$regex": clean_search, "$options": "i"}},
+                {"slug": {"$regex": clean_search, "$options": "i"}},
+            ]
+        return await self.collection.count_documents(query)
+
     async def get_verified_schemes(
         self,
         skip: int = 0,

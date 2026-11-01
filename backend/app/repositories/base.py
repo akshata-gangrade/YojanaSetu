@@ -6,6 +6,7 @@ from typing import Any, Protocol
 from app.schemas.admin import AdminUserCreate, AdminUserInDB
 from app.schemas.audit import AuditLog
 from app.schemas.chunk import SchemeChunk, SchemeChunkCreate
+from app.schemas.enums import SchemeStatus
 from app.schemas.feedback import Feedback, FeedbackCreate
 from app.schemas.scheme import Scheme, SchemeCreate, SchemeUpdate
 
@@ -15,6 +16,10 @@ class ISchemeRepository(Protocol):
 
     async def get_by_slug(self, slug: str) -> Scheme | None:
         """Fetch single scheme by unique slug."""
+        ...
+
+    async def get_by_id_or_slug(self, identifier: str) -> Scheme | None:
+        """Fetch single scheme by unique slug or MongoDB identifier."""
         ...
 
     async def get_verified_schemes(
@@ -35,6 +40,24 @@ class ISchemeRepository(Protocol):
         include_samples: bool | None = None,
     ) -> int:
         """Count verified schemes matching whitelisted filters."""
+        ...
+
+    async def get_admin_schemes(
+        self,
+        status: SchemeStatus | None = None,
+        search: str | None = None,
+        skip: int = 0,
+        limit: int = 50,
+    ) -> list[Scheme]:
+        """Fetch schemes for administrative review, filtered by status or text search."""
+        ...
+
+    async def count_admin_schemes(
+        self,
+        status: SchemeStatus | None = None,
+        search: str | None = None,
+    ) -> int:
+        """Count schemes for administrative review."""
         ...
 
     async def create_scheme(self, scheme: SchemeCreate) -> Scheme:
@@ -99,6 +122,10 @@ class IAdminRepository(Protocol):
         """Reset consecutive failed logins to zero after successful authentication."""
         ...
 
+    async def count_admins(self) -> int:
+        """Count total registered administrator accounts."""
+        ...
+
 
 class IAuditRepository(Protocol):
     """Protocol for append-only audit trail logging."""
@@ -115,6 +142,16 @@ class IAuditRepository(Protocol):
 
     async def get_by_target(self, target: str, limit: int = 50) -> list[AuditLog]:
         """Query audit log history by target identifier."""
+        ...
+
+    async def get_logs(
+        self, skip: int = 0, limit: int = 50, target: str | None = None
+    ) -> list[AuditLog]:
+        """Fetch paginated audit log history with optional target filtering."""
+        ...
+
+    async def count_logs(self, target: str | None = None) -> int:
+        """Count total audit log events matching optional target."""
         ...
 
 

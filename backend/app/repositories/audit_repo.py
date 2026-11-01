@@ -62,3 +62,24 @@ class AuditRepository:
         )
         docs = await cursor.to_list(length=bounded_limit)
         return [self._doc_to_audit(d) for d in docs]
+
+    async def get_logs(
+        self, skip: int = 0, limit: int = 50, target: str | None = None
+    ) -> list[AuditLog]:
+        """Fetch paginated audit log entries in reverse chronological order."""
+        bounded_skip = max(0, skip)
+        bounded_limit = max(1, min(limit, 100))
+        query = {"target": str(target).strip()} if target else {}
+        cursor = (
+            self.collection.find(query)
+            .sort("timestamp", DESCENDING)
+            .skip(bounded_skip)
+            .limit(bounded_limit)
+        )
+        docs = await cursor.to_list(length=bounded_limit)
+        return [self._doc_to_audit(d) for d in docs]
+
+    async def count_logs(self, target: str | None = None) -> int:
+        """Count total audit log events matching optional target filter."""
+        query = {"target": str(target).strip()} if target else {}
+        return await self.collection.count_documents(query)
