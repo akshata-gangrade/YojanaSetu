@@ -1,8 +1,3 @@
-import { fetchApi } from '../../../lib/api';
+import { extractIntake, ApiError } from '../../../lib/api';
 
-export async function submitIntakeText(text) {
-  return fetchApi('/api/v1/intake', {
-    method: 'POST',
-    body: JSON.stringify({ text }),
-  });
-}
+export { extractIntake, ApiError };

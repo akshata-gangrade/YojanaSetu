@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { UiPreferencesProvider } from '../context/UiPreferencesContext';
+import { EligibilityProvider } from '../context/EligibilityContext';
 import { ToastProvider } from '../components/ui/Toast';
 import { AppShell } from '../components/layout/AppShell';
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -22,6 +23,11 @@ const TermsPage = lazy(() =>
 const CheckEligibilityPage = lazy(() =>
   import('../pages/CheckEligibilityPage').then((m) => ({
     default: m.CheckEligibilityPage,
+  }))
+);
+const ResultsPage = lazy(() =>
+  import('../pages/ResultsPage').then((m) => ({
+    default: m.ResultsPage,
   }))
 );
 const BrowseSchemesPage = lazy(() =>
@@ -64,96 +70,106 @@ export function App() {
   return (
     <ErrorBoundary>
       <UiPreferencesProvider>
-        <ToastProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route element={<AppShell />}>
-                <Route
-                  path="/"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <HomePage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/check-eligibility"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <CheckEligibilityPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/schemes"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <BrowseSchemesPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/schemes/:slug"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <SchemeDetailPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/about"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <AboutPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/privacy"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <PrivacyPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/terms"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <TermsPage />
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <AdminPage />
-                    </Suspense>
-                  }
-                />
-                {import.meta.env.DEV && (
+        <EligibilityProvider>
+          <ToastProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route element={<AppShell />}>
                   <Route
-                    path="/design-system"
+                    path="/"
                     element={
                       <Suspense fallback={<PageFallback />}>
-                        <DesignSystemPage />
+                        <HomePage />
                       </Suspense>
                     }
                   />
-                )}
-                <Route
-                  path="*"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <NotFoundPage />
-                    </Suspense>
-                  }
-                />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </ToastProvider>
+                  <Route
+                    path="/check-eligibility"
+                    element={
+                      <Suspense fallback={<PageFallback />}>
+                        <CheckEligibilityPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/check-eligibility/results"
+                    element={
+                      <Suspense fallback={<PageFallback />}>
+                        <ResultsPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/schemes"
+                    element={
+                      <Suspense fallback={<PageFallback />}>
+                        <BrowseSchemesPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/schemes/:slug"
+                    element={
+                      <Suspense fallback={<PageFallback />}>
+                        <SchemeDetailPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/about"
+                    element={
+                      <Suspense fallback={<PageFallback />}>
+                        <AboutPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/privacy"
+                    element={
+                      <Suspense fallback={<PageFallback />}>
+                        <PrivacyPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/terms"
+                    element={
+                      <Suspense fallback={<PageFallback />}>
+                        <TermsPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="/admin"
+                    element={
+                      <Suspense fallback={<PageFallback />}>
+                        <AdminPage />
+                      </Suspense>
+                    }
+                  />
+                  {import.meta.env.DEV && (
+                    <Route
+                      path="/design-system"
+                      element={
+                        <Suspense fallback={<PageFallback />}>
+                          <DesignSystemPage />
+                        </Suspense>
+                      }
+                    />
+                  )}
+                  <Route
+                    path="*"
+                    element={
+                      <Suspense fallback={<PageFallback />}>
+                        <NotFoundPage />
+                      </Suspense>
+                    }
+                  />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </ToastProvider>
+        </EligibilityProvider>
       </UiPreferencesProvider>
     </ErrorBoundary>
   );

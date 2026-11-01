@@ -561,3 +561,79 @@
 - "सर्वर सक्रिय हो रहा है, इसमें एक मिनट तक का समय लग सकता है" (Waking up the server, this can take up to a minute)
 - "सत्यापित योजनाएं यहाँ प्रदर्शित होंगी" (Verified schemes will appear here)
 - "उद्धृत आधिकारिक संदर्भ" (Retrieved official citations)
+
+
+---
+
+## Module: Frontend Features (Part B - Check Eligibility Intake, Real-Time Details Panel & Results Page)
+
+- **Status**: Completed
+- **Date**: 2026-11-01
+
+### What Was Built & Modified
+1. **In-Memory Eligibility Context (`frontend/src/context/EligibilityContext.jsx`)**:
+   - Central ephemeral state management provider mounted above `BrowserRouter` in `App.jsx` so state survives navigation between `/check-eligibility` and `/check-eligibility/results`.
+   - **Zero-Persistence Guarantee**: Strictly in React memory. No `localStorage`, `sessionStorage`, cookies, or URL search parameters touch citizen data. Page refresh resets all profile data.
+   - **AbortController & Request ID Tracking**: "Clear my details" instantly aborts active HTTP requests, increments a monotonic request counter, and discards delayed responses that arrive after reset or component unmount.
+   - **Quick-Reply Chip Precedence**: Clicking an enumerated chip immediately updates the panel field in state; if the LLM extraction from `POST /intake/extract` conflicts with the chip, the chip's value wins.
+   - **Stale Results Invalidation**: Modifying any field in the profile automatically resets `matchResults` to `null` to prevent the browser Back button from showing stale evaluations.
+   - Focus management via `focusedField` to automatically scroll and focus specific fields when requested from the Results page.
+
+2. **Consent Gate (`frontend/src/features/intake/components/ConsentGate.jsx`)**:
+   - Informational consent card shown before any citizen input can be entered.
+   - Explains what criteria are asked, that details are used only to evaluate eligibility and are never stored, that text is processed by an AI extraction service, and explicitly instructs citizens never to provide Aadhaar, PAN, phone, email, address, or bank details.
+   - Explains that sensitive fields (social category, disability status) are strictly optional and support "Prefer not to say".
+   - Citizen must click *"I understand, continue"* (`"मैं समझ गया/गई, आगे बढ़ें"`) to access the chat and details panel.
+   - Unit tests in `frontend/src/features/intake/components/ConsentGate.test.jsx`.
+
+3. **Conversational Intake Chat (`frontend/src/features/intake/components/IntakeChat.jsx`)**:
+   - Real-time conversation calling `POST /api/v1/intake/extract` with current profile and active UI language.
+   - 1000-character input ceiling with live countdown and a privacy reminder badge (*"Never type Aadhaar, phone, or bank details"*).
+   - Screen reader friendly `role="log"` container with `aria-live="polite"`.
+   - Dynamic quick-reply chips for missing fields with fixed options (`gender`, `residence_type`, `marital_status`, `occupation`, `education_level`, `social_category`, `disability_status`).
+   - Prevents double submissions by disabling the send button and quick-reply chips while requests are in flight.
+   - Surfaces PII warnings from the backend API if sensitive identifiers are typed.
+   - Friendly Render cold start alert (*"Waking up the server, this can take up to a minute"*) via 6-second watchdog timer, plus network/rate-limit error retry handlers.
+
+4. **"Your Details" Side Panel (`frontend/src/features/intake/components/YourDetailsPanel.jsx`)**:
+   - Serves as the source of truth for citizen criteria, synchronizing bidirectional updates with the chat extractor.
+   - Form controls for all fields in `UserProfile`:
+     - Number inputs for `age` and `annual_income` (with live INR currency formatting preview).
+     - Selects matching `backend/app/schemas/enums.py` exactly (`gender`, `occupation`, `social_category`, `education_level`, `residence_type`, `marital_status`, `disability_status`, `is_student`, and all 36 Indian states/UTs).
+     - Explicit support for "Not given" (clears/omits field) and "Prefer not to say" (`prefer_not_to_say` matching schema).
+   - Smooth programmatic focus and scrolling into view when directed from a missing criterion callout.
+   - *"Clear my details"* button with immediate reset and in-flight abort.
+   - *"See my matching schemes"* button calling `POST /api/v1/match`, enabled as soon as at least one profile field is entered.
+
+5. **Results Page (`frontend/src/pages/ResultsPage.jsx` & Components)**:
+   - **Empty State Privacy Guard**: If visited directly or after page refresh without a profile in memory, renders a clear explanation and *"Start Eligibility Check"* button.
+   - **Mandatory Disclaimer Strip**: *"Indicative result. The concerned department makes the final decision."* (`role="note"`).
+   - **Keyboard-Navigable Results Tabs (`ResultsTabs.jsx`)**: Filter by status (*Eligible*, *Maybe eligible*, *Not eligible*) with live count badges and `ArrowLeft`, `ArrowRight`, `Home`, and `End` keyboard navigation.
+   - **Clean Scheme Cards (`ResultSchemeCard.jsx`)**:
+     - Localized name, benefit summary, level and state badges, sample-data badge, and last verified date.
+     - Reason parsing (`parseReasonSymbol`): Strips duplicate trailing marks (`✓`, `✕`, `?`) from backend rule engine output, rendering distinct, accessible icon badges and clean text.
+     - *"Add this detail"* button on Maybe eligible cards: identifies missing criteria and redirects directly to `/check-eligibility`, focusing the relevant panel field.
+   - **Category Tag Filter**: Dropdown dynamically populated from available category tags to filter schemes within the active status tab.
+   - **Print & PDF Support**: Dedicated *"Print Results / PDF"* button built using `window.print()` with `@media print` stylesheets that hide navigation, chat, and utility controls, excluding personal identifiers.
+
+6. **ESLint & Code Standards**:
+   - Added `'no-console': ['error', { allow: ['warn', 'error'] }]` to `frontend/eslint.config.js` to ensure citizen data and API responses are never logged.
+   - Clean ESLint run: 0 errors, 0 warnings across the entire frontend.
+   - All 75 tests passing across 12 test files (`npm test`).
+
+### Decisions
+- Context placed above `BrowserRouter` in `App.jsx` to maintain ephemeral state across route changes between `/check-eligibility` and `/check-eligibility/results` without writing to browser storage.
+- Used an AbortController with monotonic request ID sequencing to ensure late-arriving responses after "Clear my details" or component unmount are completely discarded.
+- Stripped trailing checkmarks and crossmarks from backend rule engine strings before rendering UI icon badges to prevent duplicate symbols (e.g. `✓ Age 18 to 30 ✓`).
+- Avoided jsPDF in favor of native `window.print()` to maintain native browser Devanagari text shaping and ligatures.
+
+### Assumptions
+- Backend `/api/v1/intake/extract` returns `profile_updates`, `missing_fields`, `next_question`, and optional `pii_notice`.
+- Backend `/api/v1/match` returns `eligible`, `maybe`, and `not_eligible` scheme arrays.
+
+### Hindi Copy Review Notes (For User Verification)
+- "संकेतात्मक परिणाम। अंतिम निर्णय संबंधित विभाग करता है।" (Indicative result. The concerned department makes the final decision.)
+- "मेरा विवरण साफ़ करें" (Clear my details)
+- "मेरी पात्र योजनाएं देखें" (See my matching schemes)
+- "+ यह विवरण जोड़ें" (+ Add this detail)
+- "स्मृति में कोई प्रोफ़ाइल नहीं है" (No profile in memory)

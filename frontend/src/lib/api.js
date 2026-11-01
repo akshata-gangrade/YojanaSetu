@@ -198,6 +198,84 @@ export async function askSchemeQuestion(
 }
 
 /**
+ * Sanitizes citizen profile object so only non-null valid UserProfile fields are sent,
+ * conforming strictly to backend Pydantic model_config extra="forbid".
+ */
+export function sanitizeProfileForApi(profile) {
+  if (!profile || typeof profile !== 'object') return null;
+  const clean = {};
+  const allowed = [
+    'age',
+    'gender',
+    'state',
+    'annual_income',
+    'social_category',
+    'occupation',
+    'education_level',
+    'residence_type',
+    'marital_status',
+    'disability_status',
+    'is_student',
+  ];
+  for (const key of allowed) {
+    if (profile[key] !== undefined && profile[key] !== null && profile[key] !== '') {
+      clean[key] = profile[key];
+    }
+  }
+  return Object.keys(clean).length > 0 ? clean : null;
+}
+
+/**
+ * Extract demographic criteria from citizen message via Groq LLM (POST /api/v1/intake/extract).
+ */
+export async function extractIntake({
+  message,
+  currentProfile = null,
+  language = null,
+  onSlow = null,
+  signal = null,
+} = {}) {
+  if (!message || typeof message !== 'string') {
+    throw new ApiError('Message is required.', 400, 'INVALID_MESSAGE');
+  }
+
+  const lang = language || i18n.language || 'en';
+
+  return fetchApi('/intake/extract', {
+    method: 'POST',
+    body: JSON.stringify({
+      message: message.trim(),
+      language: lang,
+      current_profile: sanitizeProfileForApi(currentProfile),
+    }),
+    onSlow,
+    signal,
+  });
+}
+
+/**
+ * Deterministically match citizen profile against verified schemes in Python rule engine (POST /api/v1/match).
+ */
+export async function matchSchemes({
+  profile,
+  language = null,
+  onSlow = null,
+  signal = null,
+} = {}) {
+  const lang = language || i18n.language || 'en';
+
+  return fetchApi('/match', {
+    method: 'POST',
+    body: JSON.stringify({
+      profile: sanitizeProfileForApi(profile) || {},
+      language: lang,
+    }),
+    onSlow,
+    signal,
+  });
+}
+
+/**
  * Health check endpoint for backend readiness verification.
  */
 export async function checkBackendHealth({ onSlow = null, signal = null } = {}) {
