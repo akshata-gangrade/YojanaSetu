@@ -27,7 +27,7 @@ export function CheckEligibilityPage() {
         <p className="text-sm text-text-muted sm:text-base">
           {t(
             'intake.pageSubtitle',
-            'Describe your situation in Hindi or English, or complete your details directly. Qualifications are evaluated deterministically.'
+            'Describe your situation in Hindi or English, or complete your details directly. Eligibility is decided by fixed rules, not by AI.'
           )}
         </p>
       </div>

@@ -1,5 +1,6 @@
 """Deterministic scheme matching service executing Python rule engine over verified schemes."""
 
+from app.core.config import Settings
 from app.repositories.base import ISchemeRepository
 from app.schemas.api import MatchResponse, SchemeMatchItem
 from app.schemas.user_profile import UserProfile
@@ -13,9 +14,11 @@ class MatchService:
         self,
         scheme_repo: ISchemeRepository,
         rule_engine: RuleEngineService | None = None,
+        settings: Settings | None = None,
     ):
         self.scheme_repo = scheme_repo
         self.rule_engine = rule_engine or RuleEngineService()
+        self.settings = settings
 
     async def match_schemes(
         self,
@@ -27,8 +30,18 @@ class MatchService:
         Invariant: Evaluated strictly by deterministic Python RuleEngineService.
         The LLM is NEVER called during eligibility evaluation.
         """
-        # Fetch verified schemes (respects INCLUDE_SAMPLE_SCHEMES setting inside repository)
-        verified_schemes = await self.scheme_repo.get_verified_schemes(limit=100)
+        effective_include_samples = (
+            self.settings.INCLUDE_SAMPLE_SCHEMES if self.settings else None
+        )
+        effective_include_unverified = (
+            self.settings.PUBLISH_UNREVIEWED_SCHEMES if self.settings else None
+        )
+        # Fetch candidate schemes (respects INCLUDE_SAMPLE_SCHEMES and PUBLISH_UNREVIEWED_SCHEMES)
+        verified_schemes = await self.scheme_repo.get_verified_schemes(
+            limit=100,
+            include_samples=effective_include_samples,
+            include_unverified=effective_include_unverified,
+        )
 
         # Pre-filter by citizen state and scheme administrative tier
         prefiltered = self.rule_engine.prefilter_schemes(verified_schemes, profile)
@@ -66,6 +79,7 @@ class MatchService:
                 last_verified=s.last_verified,
                 reasons=reasons,
                 status=result.status.value,
+                is_verified=s.is_verified,
             )
 
             if result.status == EligibilityStatus.ELIGIBLE:

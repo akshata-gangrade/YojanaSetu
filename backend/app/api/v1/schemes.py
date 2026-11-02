@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_rag_service, get_scheme_repo
-from app.core.config import get_settings
+from app.core.config import Settings, get_settings
 from app.core.errors import NotFoundError
 from app.core.rate_limit import rate_limit_ask_dependency, rate_limit_dependency
 from app.repositories.base import ISchemeRepository
@@ -28,6 +28,7 @@ async def list_verified_schemes(
     level: SchemeLevel | None = Query(None, description="Filter by level ('central' or 'state')"),
     category: str | None = Query(None, description="Filter by category tag"),
     scheme_repo: ISchemeRepository = Depends(get_scheme_repo),
+    settings: Settings = Depends(get_settings),
 ) -> PaginatedSchemesResponse:
     """Retrieve verified schemes with whitelisted query parameters."""
     level_str = level.value if level else None
@@ -36,6 +37,8 @@ async def list_verified_schemes(
         limit=limit,
         state=state,
         level=level_str,
+        include_samples=settings.INCLUDE_SAMPLE_SCHEMES,
+        include_unverified=settings.PUBLISH_UNREVIEWED_SCHEMES,
     )
 
     # In-memory category filter if requested
@@ -47,7 +50,12 @@ async def list_verified_schemes(
             if any(clean_cat == tag.strip().lower() for tag in s.category_tags)
         ]
 
-    total = await scheme_repo.count_verified(state=state, level=level_str)
+    total = await scheme_repo.count_verified(
+        state=state,
+        level=level_str,
+        include_samples=settings.INCLUDE_SAMPLE_SCHEMES,
+        include_unverified=settings.PUBLISH_UNREVIEWED_SCHEMES,
+    )
 
     return PaginatedSchemesResponse(
         items=schemes,
@@ -66,13 +74,21 @@ async def list_verified_schemes(
 async def get_scheme_by_slug(
     slug: str,
     scheme_repo: ISchemeRepository = Depends(get_scheme_repo),
+    settings: Settings = Depends(get_settings),
 ) -> Scheme:
-    """Fetch verified scheme by unique slug."""
+    """Fetch scheme by unique slug, including unverified demo schemes if enabled."""
     scheme = await scheme_repo.get_by_slug(slug)
-    if not scheme or scheme.status != SchemeStatus.VERIFIED:
+    if not scheme:
         raise NotFoundError(f"Scheme '{slug}' not found.")
 
-    if scheme.is_sample and not get_settings().INCLUDE_SAMPLE_SCHEMES:
+    allowed_statuses = {SchemeStatus.VERIFIED}
+    if settings.PUBLISH_UNREVIEWED_SCHEMES:
+        allowed_statuses.add(SchemeStatus.NEEDS_REVIEW)
+
+    if scheme.status not in allowed_statuses:
+        raise NotFoundError(f"Scheme '{slug}' not found.")
+
+    if scheme.is_sample and not settings.INCLUDE_SAMPLE_SCHEMES:
         raise NotFoundError(f"Scheme '{slug}' not found.")
 
     return scheme
@@ -89,13 +105,21 @@ async def ask_scheme_question(
     request: SchemeAskRequest,
     scheme_repo: ISchemeRepository = Depends(get_scheme_repo),
     rag_service: RAGService = Depends(get_rag_service),
+    settings: Settings = Depends(get_settings),
 ) -> SchemeAskResponse:
     """Query scheme guidelines via RAG (stubbed until RAG module is active)."""
     scheme = await scheme_repo.get_by_slug(slug)
-    if not scheme or scheme.status != SchemeStatus.VERIFIED:
+    if not scheme:
         raise NotFoundError(f"Scheme '{slug}' not found.")
 
-    if scheme.is_sample and not get_settings().INCLUDE_SAMPLE_SCHEMES:
+    allowed_statuses = {SchemeStatus.VERIFIED}
+    if settings.PUBLISH_UNREVIEWED_SCHEMES:
+        allowed_statuses.add(SchemeStatus.NEEDS_REVIEW)
+
+    if scheme.status not in allowed_statuses:
+        raise NotFoundError(f"Scheme '{slug}' not found.")
+
+    if scheme.is_sample and not settings.INCLUDE_SAMPLE_SCHEMES:
         raise NotFoundError(f"Scheme '{slug}' not found.")
 
     return await rag_service.answer_question(

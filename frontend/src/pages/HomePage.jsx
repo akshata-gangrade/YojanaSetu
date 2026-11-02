@@ -245,7 +245,7 @@ export function HomePage() {
               2
             </div>
             <h3 className="text-lg font-bold text-navy">
-              {t('howItWorks.step2Title', '2. Deterministic Eligibility Matching')}
+              {t('howItWorks.step2Title', '2. Fixed-Rule Eligibility Matching')}
             </h3>
             <p className="text-sm leading-relaxed text-text-muted">
               {t(
@@ -346,7 +346,7 @@ export function HomePage() {
             <p className="text-sm leading-relaxed text-text-muted">
               {t(
                 'trust.card2Desc',
-                'Your answers exist only in temporary browser memory. We never ask for or store Aadhaar numbers, phone numbers, or bank accounts.'
+                'We do not save your details on our servers or in your browser storage. They are held only in this page\'s memory and are cleared when you refresh or close the tab. We never ask for or store Aadhaar numbers, phone numbers, or bank accounts.'
               )}
             </p>
           </Card>

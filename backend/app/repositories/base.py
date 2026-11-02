@@ -29,6 +29,7 @@ class ISchemeRepository(Protocol):
         state: str | None = None,
         level: str | None = None,
         include_samples: bool | None = None,
+        include_unverified: bool | None = None,
     ) -> list[Scheme]:
         """Fetch verified schemes with whitelisted filters."""
         ...
@@ -38,6 +39,7 @@ class ISchemeRepository(Protocol):
         state: str | None = None,
         level: str | None = None,
         include_samples: bool | None = None,
+        include_unverified: bool | None = None,
     ) -> int:
         """Count verified schemes matching whitelisted filters."""
         ...

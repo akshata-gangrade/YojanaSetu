@@ -14,7 +14,7 @@ describe('ConsentGate Component', () => {
     );
 
     // Header & Badge
-    expect(screen.getByText(/Zero Data Storage • Privacy First|कोई डेटा संग्रह नहीं/i)).toBeInTheDocument();
+    expect(screen.getByText(/No data saved • Privacy First|कोई डेटा सहेजा नहीं जाता/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
       /Before You Check Your Eligibility|पात्रता जांचने से पहले यह समझें/i
     );

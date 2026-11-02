@@ -37,6 +37,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     setup_logging(settings.LOG_LEVEL)
     logger.info("Starting YojanaSetu API (%s mode)", settings.ENV)
 
+    # Initialize DB client inside the running event loop
+    MongoDBManager.get_client()
+
     yield
 
     logger.info("Shutting down YojanaSetu API, closing DB connections...")

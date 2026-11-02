@@ -1,0 +1,677 @@
+[
+    {
+        "slug": "mukhyamantri-kanya-vivah-nikah-yojana",
+        "name": "Mukhyamantri Kanya Vivah / Nikah Yojana",
+        "name_hi": "मुख्यमंत्री कन्या विवाह / निकाह योजना",
+        "level": "state",
+        "state": "madhya_pradesh",
+        "category_tags": [
+            "girl_child",
+            "women",
+            "marriage_assistance"
+        ],
+        "benefit_summary": "Financial assistance for the marriage of girls from poor and unorganised-worker families in Madhya Pradesh, given as a gift to the bride plus a grant for the community marriage ceremony. Also check: the bride must be at least 18 and the groom at least 21, the family must meet the income or Sambal registration condition, and the amount is set by the state, so confirm it on the portal.",
+        "benefit_summary_hi": "मध्य प्रदेश के गरीब और असंगठित श्रमिक परिवारों की कन्याओं के विवाह के लिए आर्थिक सहायता, जिसमें वधू को उपहार राशि और सामूहिक विवाह समारोह के लिए अनुदान दिया जाता है। ध्यान दें: वधू की आयु कम से कम 18 वर्ष और वर की आयु कम से कम 21 वर्ष होनी चाहिए, परिवार को आय या संबल पंजीकरण की शर्त पूरी करनी होगी, और राशि राज्य सरकार तय करती है, इसलिए पोर्टल पर पुष्टि करें।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "state",
+                    "op": "eq",
+                    "value": "madhya_pradesh"
+                },
+                {
+                    "field": "gender",
+                    "op": "eq",
+                    "value": "female"
+                },
+                {
+                    "field": "age",
+                    "op": "gte",
+                    "value": 18
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Samagra ID",
+            "Age proof of bride and groom",
+            "Income or Sambal registration proof",
+            "Bank account details"
+        ],
+        "application_steps": [
+            "Visit sambal.mp.gov.in or your local body office and check the conditions.",
+            "Register the bride and groom with their Samagra IDs.",
+            "Submit the documents.",
+            "After verification, the marriage takes place at the organised community event or as an individual marriage, and the assistance is paid."
+        ],
+        "apply_url": "https://sambal.mp.gov.in/",
+        "source_url": "https://sambal.mp.gov.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "pm-matru-vandana-yojana",
+        "name": "Pradhan Mantri Matru Vandana Yojana (PMMVY)",
+        "name_hi": "प्रधानमंत्री मातृ वंदना योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "women",
+            "maternity",
+            "financial_assistance"
+        ],
+        "benefit_summary": "Cash incentive for pregnant and breastfeeding women to help with nutrition and lost wages: ₹5,000 in instalments for the first living child and, under the revised rules, ₹6,000 in one instalment when the second child is a girl. Also check: you must be 19 or older, women in regular government or public-sector jobs and women who get similar maternity benefits under another law are not eligible, and you register at your Anganwadi centre or health facility.",
+        "benefit_summary_hi": "गर्भवती और स्तनपान कराने वाली महिलाओं को पोषण और मज़दूरी के नुकसान की भरपाई के लिए नकद प्रोत्साहन: पहले जीवित बच्चे के लिए किस्तों में ₹5,000 और संशोधित नियमों के अनुसार दूसरी संतान बालिका होने पर एक किस्त में ₹6,000। ध्यान दें: आयु 19 वर्ष या अधिक हो, नियमित सरकारी या सार्वजनिक क्षेत्र की नौकरी वाली महिलाएँ और अन्य कानून के तहत समान मातृत्व लाभ पाने वाली महिलाएँ पात्र नहीं हैं, और पंजीकरण आंगनवाड़ी केंद्र या स्वास्थ्य केंद्र पर कराना होगा।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "gender",
+                    "op": "eq",
+                    "value": "female"
+                },
+                {
+                    "field": "age",
+                    "op": "gte",
+                    "value": 19
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Mother and Child Protection (MCP) card",
+            "Bank or post office account details",
+            "Husband's Aadhaar details, if asked"
+        ],
+        "application_steps": [
+            "Register at your nearest Anganwadi centre or approved health facility as soon as the pregnancy is confirmed.",
+            "Fill in the application form with your Aadhaar and bank details.",
+            "Get your pregnancy checks and child immunisation done on time, because instalments are linked to them.",
+            "The amount is paid directly into your account in instalments."
+        ],
+        "apply_url": "https://wcd.gov.in/",
+        "source_url": "https://wcd.gov.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "stand-up-india",
+        "name": "Stand-Up India Scheme",
+        "name_hi": "स्टैंड-अप इंडिया योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "women",
+            "entrepreneurship",
+            "credit"
+        ],
+        "benefit_summary": "Bank loans between ₹10 lakh and ₹1 crore for setting up a new enterprise in manufacturing, services or trading, for women entrepreneurs and Scheduled Caste or Scheduled Tribe entrepreneurs, with at least one such borrower per bank branch. Also check: the enterprise must be new, the loan is for non-farm activities, and the borrower should not be a defaulter to any bank.",
+        "benefit_summary_hi": "महिला उद्यमियों तथा अनुसूचित जाति या अनुसूचित जनजाति के उद्यमियों को विनिर्माण, सेवा या व्यापार में नया उद्यम शुरू करने के लिए ₹10 लाख से ₹1 करोड़ तक का बैंक ऋण, प्रत्येक बैंक शाखा में कम से कम एक ऐसे ऋणी के साथ। ध्यान दें: उद्यम नया होना चाहिए, ऋण गैर-कृषि गतिविधियों के लिए है, और आवेदक किसी बैंक का बकायादार नहीं होना चाहिए।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "age",
+                    "op": "gte",
+                    "value": 18
+                }
+            ],
+            "any_of": [
+                {
+                    "field": "gender",
+                    "op": "eq",
+                    "value": "female"
+                },
+                {
+                    "field": "social_category",
+                    "op": "in",
+                    "value": [
+                        "sc",
+                        "st"
+                    ]
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "PAN card",
+            "Business plan or project report",
+            "Identity and address proof",
+            "Caste certificate (for SC/ST applicants)"
+        ],
+        "application_steps": [
+            "Prepare a project report for your new enterprise.",
+            "Register on the Stand-Up Mitra portal, or approach a bank branch or the lead district manager.",
+            "Apply for the loan and submit your documents.",
+            "The bank assesses your application, and the loan is sanctioned and paid."
+        ],
+        "apply_url": "https://www.standupmitra.in/",
+        "source_url": "https://www.standupmitra.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "day-nrlm-self-help-groups",
+        "name": "Deendayal Antyodaya Yojana: National Rural Livelihoods Mission (DAY-NRLM)",
+        "name_hi": "दीनदयाल अंत्योदय योजना: राष्ट्रीय ग्रामीण आजीविका मिशन",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "women",
+            "rural_development",
+            "livelihood"
+        ],
+        "benefit_summary": "Helps rural poor women organise into self-help groups, with training, a revolving fund and a community investment fund for the group, and bank loans at subsidised interest to start or grow livelihood activities. Also check: the support is given to the group through the village organisation, and exact amounts depend on your state and block.",
+        "benefit_summary_hi": "ग्रामीण गरीब महिलाओं को स्वयं सहायता समूह बनाने में मदद, प्रशिक्षण, समूह के लिए रिवॉल्विंग फंड और सामुदायिक निवेश कोष, तथा आजीविका शुरू या बढ़ाने के लिए रियायती ब्याज पर बैंक ऋण। ध्यान दें: सहायता गाँव के संगठन के माध्यम से समूह को मिलती है, और राशि आपके राज्य और ब्लॉक पर निर्भर करती है।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "gender",
+                    "op": "eq",
+                    "value": "female"
+                },
+                {
+                    "field": "residence_type",
+                    "op": "eq",
+                    "value": "rural"
+                },
+                {
+                    "field": "age",
+                    "op": "gte",
+                    "value": 18
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Bank account details",
+            "Ration card or proof of belonging to a poor household",
+            "Passport-size photograph"
+        ],
+        "application_steps": [
+            "Contact your Gram Panchayat or the block-level NRLM team.",
+            "Join an existing self-help group or form a group of 10 to 20 women from poor households.",
+            "Open a group bank account and hold regular savings meetings.",
+            "Attend the group's training, then apply for the revolving fund, the community investment fund and a bank loan through the group."
+        ],
+        "apply_url": "https://aajeevika.gov.in/",
+        "source_url": "https://aajeevika.gov.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "kisan-credit-card",
+        "name": "Kisan Credit Card (KCC)",
+        "name_hi": "किसान क्रेडिट कार्ड योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "agriculture",
+            "farmers",
+            "credit"
+        ],
+        "benefit_summary": "Short-term credit for crop cultivation and related needs at a concessional interest rate, with an interest subvention for repaying on time. Farmers, tenant farmers, sharecroppers, and those in animal husbandry and fisheries can apply. Also check: the credit limit and the exact rate depend on your bank and the current interest subvention scheme.",
+        "benefit_summary_hi": "फसल उत्पादन और संबंधित ज़रूरतों के लिए रियायती ब्याज दर पर अल्पकालिक ऋण, समय पर चुकाने पर ब्याज में छूट के साथ। किसान, बटाईदार, काश्तकार तथा पशुपालन और मत्स्य पालन से जुड़े लोग आवेदन कर सकते हैं। ध्यान दें: ऋण सीमा और ब्याज दर आपके बैंक और वर्तमान ब्याज सहायता योजना पर निर्भर करती है।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "occupation",
+                    "op": "eq",
+                    "value": "farmer"
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Land records or tenancy proof",
+            "Passport-size photograph",
+            "Bank account details",
+            "Details of crops grown"
+        ],
+        "application_steps": [
+            "Visit your nearest bank branch (cooperative, commercial or regional rural bank).",
+            "Fill in the Kisan Credit Card application form.",
+            "Submit your land and identity documents.",
+            "After verification, you receive the card and your credit limit."
+        ],
+        "apply_url": "https://pmkisan.gov.in/",
+        "source_url": "https://pmkisan.gov.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "pm-kisan-maandhan-yojana",
+        "name": "Pradhan Mantri Kisan Maandhan Yojana (PM-KMY)",
+        "name_hi": "प्रधानमंत्री किसान मानधन योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "agriculture",
+            "farmers",
+            "pension"
+        ],
+        "benefit_summary": "A pension of ₹3,000 a month after the age of 60 for small and marginal farmers, funded by a monthly contribution of ₹55 to ₹200 depending on the age at joining, which the government matches. Also check: you must hold up to 2 hectares of land, join between 18 and 40, and not be covered by another pension scheme such as the NPS, ESIC or EPFO.",
+        "benefit_summary_hi": "छोटे और सीमांत किसानों को 60 वर्ष की आयु के बाद ₹3,000 प्रति माह की पेंशन, जो जुड़ने की आयु के अनुसार ₹55 से ₹200 के मासिक अंशदान से मिलती है, और उतनी ही राशि सरकार जमा करती है। ध्यान दें: आपके पास अधिकतम 2 हेक्टेयर भूमि होनी चाहिए, 18 से 40 वर्ष की आयु में जुड़ना होगा, और आप एनपीएस, ईएसआईसी या ईपीएफओ जैसी किसी अन्य पेंशन योजना में नहीं होने चाहिए।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "occupation",
+                    "op": "eq",
+                    "value": "farmer"
+                },
+                {
+                    "field": "age",
+                    "op": "between",
+                    "value": [
+                        18,
+                        40
+                    ]
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Savings bank account with IFSC code",
+            "Land record",
+            "Mobile number"
+        ],
+        "application_steps": [
+            "Visit your nearest Common Service Centre with your Aadhaar card, land record and bank passbook.",
+            "Verify your details and choose your monthly contribution based on your age.",
+            "Give consent for monthly auto-debit from your bank account.",
+            "Collect your pension account number and card."
+        ],
+        "apply_url": "https://pmkmy.gov.in/",
+        "source_url": "https://pmkmy.gov.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "soil-health-card-scheme",
+        "name": "Soil Health Card Scheme",
+        "name_hi": "मृदा स्वास्थ्य कार्ड योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "agriculture",
+            "farmers",
+            "advisory"
+        ],
+        "benefit_summary": "A free Soil Health Card for every farmer, giving the nutrient status of your soil and crop-wise fertiliser recommendations, issued after soil testing once every two years. Also check: soil samples are collected by the agriculture department or its agencies, so contact your local agriculture office to give a sample.",
+        "benefit_summary_hi": "हर किसान को निःशुल्क मृदा स्वास्थ्य कार्ड, जिसमें आपकी मिट्टी के पोषक तत्वों की स्थिति और फसल के अनुसार उर्वरक की सलाह होती है; मिट्टी की जाँच के बाद यह हर दो साल में जारी किया जाता है। ध्यान दें: मिट्टी के नमूने कृषि विभाग या उसकी एजेंसियाँ लेती हैं, इसलिए नमूना देने के लिए अपने स्थानीय कृषि कार्यालय से संपर्क करें।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "occupation",
+                    "op": "eq",
+                    "value": "farmer"
+                }
+            ]
+        },
+        "required_documents": [
+            "Farmer's name and mobile number",
+            "Land details (survey or khasra number)",
+            "Aadhaar card, if asked"
+        ],
+        "application_steps": [
+            "Contact your local agriculture office or village agriculture worker.",
+            "Give your land details and request soil sampling for your field.",
+            "Your soil sample is collected and tested at a laboratory.",
+            "Receive your Soil Health Card, or download it from the Soil Health Card portal."
+        ],
+        "apply_url": "https://soilhealth.dac.gov.in/",
+        "source_url": "https://soilhealth.dac.gov.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "mukhyamantri-kisan-kalyan-yojana",
+        "name": "Mukhyamantri Kisan Kalyan Yojana",
+        "name_hi": "मुख्यमंत्री किसान कल्याण योजना",
+        "level": "state",
+        "state": "madhya_pradesh",
+        "category_tags": [
+            "agriculture",
+            "farmers",
+            "financial_assistance"
+        ],
+        "benefit_summary": "Additional state financial assistance for Madhya Pradesh farmers who receive PM-KISAN, paid in instalments on top of the central PM-KISAN amount. Also check: you must be a PM-KISAN beneficiary, and the amount is set by the state each year, so confirm it on the portal.",
+        "benefit_summary_hi": "मध्य प्रदेश के उन किसानों को राज्य सरकार की ओर से अतिरिक्त आर्थिक सहायता, जो पीएम-किसान का लाभ पाते हैं; यह केंद्र की पीएम-किसान राशि के अतिरिक्त किस्तों में दी जाती है। ध्यान दें: आप पीएम-किसान के लाभार्थी होने चाहिए, और राशि राज्य हर वर्ष तय करता है, इसलिए पोर्टल पर पुष्टि करें।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "state",
+                    "op": "eq",
+                    "value": "madhya_pradesh"
+                },
+                {
+                    "field": "occupation",
+                    "op": "eq",
+                    "value": "farmer"
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Samagra ID",
+            "PM-KISAN registration details",
+            "Bank account details"
+        ],
+        "application_steps": [
+            "Make sure you are registered and receiving PM-KISAN.",
+            "Check the state farmer welfare portal or your local agriculture office for any extra registration.",
+            "Keep your bank account linked with Aadhaar so the amount can be paid directly.",
+            "Track instalments on the portal."
+        ],
+        "apply_url": "https://mpkrishi.mp.gov.in/",
+        "source_url": "https://mpkrishi.mp.gov.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "central-sector-scholarship-scheme",
+        "name": "Central Sector Scholarship Scheme for College and University Students",
+        "name_hi": "केंद्रीय क्षेत्र छात्रवृत्ति योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "education",
+            "scholarship",
+            "students"
+        ],
+        "benefit_summary": "Scholarship for meritorious students from low-income families who are in college or university after Class 12: ₹12,000 a year in the first three years of a degree and ₹20,000 a year in the fourth and fifth years, as set by the scheme. Also check: you must be in the top 20 percentile of your Class 12 board, the family income must not exceed ₹4.5 lakh a year, and you must take a regular (not distance) course.",
+        "benefit_summary_hi": "कक्षा 12 के बाद कॉलेज या विश्वविद्यालय में पढ़ रहे कम आय वाले परिवारों के मेधावी विद्यार्थियों के लिए छात्रवृत्ति: योजना के अनुसार डिग्री के पहले तीन वर्षों में ₹12,000 और चौथे व पाँचवें वर्ष में ₹20,000 प्रति वर्ष। ध्यान दें: आप कक्षा 12 बोर्ड के शीर्ष 20 प्रतिशतक में होने चाहिए, पारिवारिक आय ₹4.5 लाख प्रति वर्ष से अधिक न हो, और पाठ्यक्रम नियमित (दूरस्थ नहीं) होना चाहिए।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "is_student",
+                    "op": "eq",
+                    "value": true
+                },
+                {
+                    "field": "annual_income",
+                    "op": "lte",
+                    "value": 450000
+                }
+            ]
+        },
+        "required_documents": [
+            "Class 12 marksheet",
+            "Income certificate",
+            "Aadhaar card",
+            "Admission proof or fee receipt",
+            "Bank account details"
+        ],
+        "application_steps": [
+            "Register on the National Scholarship Portal at scholarships.gov.in.",
+            "Select the Central Sector Scholarship Scheme and fill in the application.",
+            "Upload your documents and submit.",
+            "Your institute verifies the application, and the scholarship is paid into your bank account."
+        ],
+        "apply_url": "https://scholarships.gov.in/",
+        "source_url": "https://scholarships.gov.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "indira-gandhi-national-old-age-pension",
+        "name": "Indira Gandhi National Old Age Pension Scheme (IGNOAPS)",
+        "name_hi": "इंदिरा गांधी राष्ट्रीय वृद्धावस्था पेंशन योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "senior_citizens",
+            "pension",
+            "social_security"
+        ],
+        "benefit_summary": "A monthly pension for elderly people from Below Poverty Line households: central assistance of ₹200 a month for ages 60 to 79 and ₹500 a month from age 80, which many states top up. Also check: the person must belong to a BPL household, and the state's top-up amount and application process differ by state.",
+        "benefit_summary_hi": "गरीबी रेखा से नीचे के परिवारों के बुज़ुर्गों के लिए मासिक पेंशन: 60 से 79 वर्ष की आयु के लिए ₹200 प्रति माह और 80 वर्ष से ₹500 प्रति माह की केंद्रीय सहायता, जिसमें कई राज्य अपनी ओर से राशि जोड़ते हैं। ध्यान दें: व्यक्ति गरीबी रेखा से नीचे के परिवार का होना चाहिए, और राज्य की अतिरिक्त राशि व आवेदन प्रक्रिया राज्य के अनुसार अलग होती है।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "age",
+                    "op": "gte",
+                    "value": 60
+                }
+            ]
+        },
+        "required_documents": [
+            "Age proof",
+            "BPL card or BPL list proof",
+            "Aadhaar card",
+            "Bank or post office account details",
+            "Passport-size photograph"
+        ],
+        "application_steps": [
+            "Contact your Gram Panchayat, ward office or the local social welfare office.",
+            "Fill in the pension application form with your age and BPL details.",
+            "Submit the documents for verification.",
+            "After approval, the pension is paid into your account each month."
+        ],
+        "apply_url": "https://nsap.nic.in/",
+        "source_url": "https://nsap.nic.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "pm-awas-yojana-gramin",
+        "name": "Pradhan Mantri Awas Yojana (Gramin)",
+        "name_hi": "प्रधानमंत्री आवास योजना (ग्रामीण)",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "housing",
+            "rural_development",
+            "financial_assistance"
+        ],
+        "benefit_summary": "Financial help to build a pucca house with basic amenities: ₹1.20 lakh in plain areas and ₹1.30 lakh in hilly and difficult areas, plus up to ₹12,000 for a toilet and wages for 90 to 95 days of work. Also check: beneficiaries are selected from the Socio-Economic Caste Census list and the Awaas Plus survey, you must be houseless or live in a kutcha house, and you must not own a pucca house, a motorised vehicle or a fishing boat.",
+        "benefit_summary_hi": "पक्का मकान बनाने के लिए आर्थिक सहायता: मैदानी क्षेत्रों में ₹1.20 लाख और पहाड़ी व कठिन क्षेत्रों में ₹1.30 लाख, साथ ही शौचालय के लिए ₹12,000 तक और 90 से 95 दिन की मज़दूरी। ध्यान दें: लाभार्थी सामाजिक-आर्थिक जाति जनगणना सूची और आवास प्लस सर्वे से चुने जाते हैं, आप बेघर हों या कच्चे मकान में रहते हों, और आपके पास पक्का मकान, मोटर चालित वाहन या मछली पकड़ने की नाव नहीं होनी चाहिए।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "residence_type",
+                    "op": "eq",
+                    "value": "rural"
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Job card (MGNREGA), if available",
+            "Bank account details",
+            "Proof of residence"
+        ],
+        "application_steps": [
+            "Check whether your name is on the PMAY-G permanent wait list at your Gram Panchayat or on the portal.",
+            "If it is, the Gram Panchayat contacts you for sanction and registration.",
+            "Submit your Aadhaar and bank details and have your house geo-tagged.",
+            "Build the house in stages, and the assistance is paid in instalments into your account."
+        ],
+        "apply_url": "https://pmayg.nic.in/",
+        "source_url": "https://pmayg.nic.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "pm-mudra-yojana",
+        "name": "Pradhan Mantri Mudra Yojana (PMMY)",
+        "name_hi": "प्रधानमंत्री मुद्रा योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "entrepreneurship",
+            "credit",
+            "self_employment"
+        ],
+        "benefit_summary": "Collateral-free loans up to ₹20 lakh for non-farm small businesses in manufacturing, trading and services: Shishu (up to ₹50,000), Kishor (₹50,001 to ₹5 lakh), Tarun (₹5 lakh to ₹10 lakh) and Tarun Plus (₹10 lakh to ₹20 lakh). Also check: the loan is for a non-farm income-generating activity, and the bank decides based on your business plan.",
+        "benefit_summary_hi": "विनिर्माण, व्यापार और सेवा क्षेत्र के गैर-कृषि छोटे व्यवसायों के लिए बिना गारंटी के ₹20 लाख तक का ऋण: शिशु (₹50,000 तक), किशोर (₹50,001 से ₹5 लाख), तरुण (₹5 लाख से ₹10 लाख) और तरुण प्लस (₹10 लाख से ₹20 लाख)। ध्यान दें: ऋण गैर-कृषि आय-सृजन गतिविधि के लिए है, और बैंक आपकी व्यावसायिक योजना के आधार पर निर्णय लेता है।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "age",
+                    "op": "gte",
+                    "value": 18
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "PAN card",
+            "Identity and address proof",
+            "Business plan or details of the business",
+            "Bank account details"
+        ],
+        "application_steps": [
+            "Decide which category (Shishu, Kishor, Tarun or Tarun Plus) matches the money you need.",
+            "Visit a bank, microfinance institution or NBFC, or apply on the Mudra portal.",
+            "Submit your application with your business details and documents.",
+            "After approval, the loan is paid out and you receive a Mudra card."
+        ],
+        "apply_url": "https://www.mudra.org.in/",
+        "source_url": "https://www.mudra.org.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "indira-gandhi-national-disability-pension",
+        "name": "Indira Gandhi National Disability Pension Scheme (IGNDPS)",
+        "name_hi": "इंदिरा गांधी राष्ट्रीय विकलांगता पेंशन योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "disability",
+            "pension",
+            "social_security"
+        ],
+        "benefit_summary": "A monthly pension for persons with severe or multiple disabilities from Below Poverty Line households: central assistance of ₹300 a month for ages 18 to 79 and ₹500 a month from age 80, which many states top up. Also check: the disability must be 80 percent or more, and the person must belong to a BPL household.",
+        "benefit_summary_hi": "गरीबी रेखा से नीचे के परिवारों के गंभीर या बहु-विकलांगता वाले व्यक्तियों के लिए मासिक पेंशन: 18 से 79 वर्ष की आयु के लिए ₹300 प्रति माह और 80 वर्ष से ₹500 प्रति माह की केंद्रीय सहायता, जिसमें कई राज्य अपनी ओर से राशि जोड़ते हैं। ध्यान दें: विकलांगता 80 प्रतिशत या अधिक होनी चाहिए और व्यक्ति गरीबी रेखा से नीचे के परिवार का होना चाहिए।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "age",
+                    "op": "gte",
+                    "value": 18
+                },
+                {
+                    "field": "disability_status",
+                    "op": "not_in",
+                    "value": [
+                        "none"
+                    ]
+                }
+            ]
+        },
+        "required_documents": [
+            "Disability certificate (80 percent or more) or UDID card",
+            "BPL card or BPL list proof",
+            "Age proof",
+            "Aadhaar card",
+            "Bank or post office account details"
+        ],
+        "application_steps": [
+            "Contact your Gram Panchayat, ward office or the local social welfare office.",
+            "Fill in the pension application form with your disability and BPL details.",
+            "Submit the certificates and documents for verification.",
+            "After approval, the pension is paid into your account each month."
+        ],
+        "apply_url": "https://nsap.nic.in/",
+        "source_url": "https://nsap.nic.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "pmegp-employment-generation",
+        "name": "Prime Minister's Employment Generation Programme (PMEGP)",
+        "name_hi": "प्रधानमंत्री रोज़गार सृजन कार्यक्रम (पीएमईजीपी)",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "entrepreneurship",
+            "employment_and_skills",
+            "subsidy"
+        ],
+        "benefit_summary": "A government subsidy of 15 to 35 percent of the project cost, linked to a bank loan, for setting up a new micro enterprise. Projects of up to ₹50 lakh in manufacturing and ₹20 lakh in services are covered, and the subsidy is higher for women, SC/ST, OBC, minorities, ex-servicemen and rural areas. Also check: it is only for new projects, an 8th-class pass is needed for larger projects, and you apply online.",
+        "benefit_summary_hi": "बैंक ऋण से जुड़ी परियोजना लागत के 15 से 35 प्रतिशत तक सरकारी अनुदान, नया सूक्ष्म उद्यम शुरू करने के लिए। विनिर्माण में ₹50 लाख और सेवा में ₹20 लाख तक की परियोजनाएँ शामिल हैं, और महिलाओं, अनुसूचित जाति/जनजाति, ओबीसी, अल्पसंख्यकों, पूर्व सैनिकों तथा ग्रामीण क्षेत्रों के लिए अनुदान अधिक है। ध्यान दें: यह केवल नई परियोजनाओं के लिए है, बड़ी परियोजनाओं के लिए आठवीं पास होना ज़रूरी है, और आवेदन ऑनलाइन करना होता है।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "age",
+                    "op": "gte",
+                    "value": 18
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Project report",
+            "Educational certificate (8th pass for larger projects)",
+            "Caste or special category certificate, if applicable",
+            "Passport-size photograph",
+            "Bank account details"
+        ],
+        "application_steps": [
+            "Prepare a project report for your new enterprise.",
+            "Apply online on the PMEGP e-portal and choose your implementing agency (KVIC, KVIB or DIC).",
+            "Attend the interview and get the project approved, then the bank sanctions the loan.",
+            "Complete the entrepreneurship training, start the unit, and the subsidy is credited to your loan account."
+        ],
+        "apply_url": "https://www.kviconline.gov.in/",
+        "source_url": "https://www.kviconline.gov.in/",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    }
+]

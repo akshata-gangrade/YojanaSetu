@@ -16,21 +16,38 @@ from app.schemas.scheme import Scheme, SchemeCreate, SchemeUpdate
 class FakeSchemeRepository:
     """In-memory fake scheme repository replicating MongoDB query semantics."""
 
-    def __init__(self, include_sample_schemes: bool = False) -> None:
+    def __init__(
+        self,
+        include_sample_schemes: bool = False,
+        include_unverified_schemes: bool | None = None,
+    ) -> None:
         self._schemes: dict[str, dict[str, Any]] = {}
         self._include_sample_schemes = include_sample_schemes
+        if include_unverified_schemes is None:
+            from app.core.config import get_settings
+
+            self._include_unverified_schemes = get_settings().PUBLISH_UNREVIEWED_SCHEMES
+        else:
+            self._include_unverified_schemes = include_unverified_schemes
+
+    @staticmethod
+    def _doc_to_scheme(doc: dict[str, Any]) -> Scheme:
+        data = dict(doc)
+        if "_id" in data:
+            data["id"] = str(data.pop("_id"))
+        return Scheme.model_validate(data)
 
     async def get_by_slug(self, slug: str) -> Scheme | None:
         data = self._schemes.get(slug.strip())
         if not data:
             return None
-        return Scheme.model_validate(data)
+        return self._doc_to_scheme(data)
 
     async def get_by_id_or_slug(self, identifier: str) -> Scheme | None:
         clean = identifier.strip()
         for s in self._schemes.values():
             if s.get("id") == clean or s.get("slug") == clean:
-                return Scheme.model_validate(s)
+                return self._doc_to_scheme(s)
         return None
 
     async def get_admin_schemes(
@@ -57,7 +74,7 @@ class FakeSchemeRepository:
                     continue
             results.append(s)
         results.sort(key=lambda x: str(x.get("updated_at", "")), reverse=True)
-        return [Scheme.model_validate(r) for r in results[skip : skip + limit]]
+        return [self._doc_to_scheme(r) for r in results[skip : skip + limit]]
 
     async def count_admin_schemes(
         self,
@@ -89,13 +106,23 @@ class FakeSchemeRepository:
         state: str | None = None,
         level: str | None = None,
         include_samples: bool | None = None,
+        include_unverified: bool | None = None,
     ) -> list[Scheme]:
         effective_include_samples = (
             self._include_sample_schemes if include_samples is None else include_samples
         )
+        effective_include_unverified = (
+            self._include_unverified_schemes
+            if include_unverified is None
+            else include_unverified
+        )
+        allowed_statuses = {SchemeStatus.VERIFIED.value}
+        if effective_include_unverified:
+            allowed_statuses.add(SchemeStatus.NEEDS_REVIEW.value)
+
         results: list[dict[str, Any]] = []
         for s in self._schemes.values():
-            if s.get("status") != SchemeStatus.VERIFIED.value:
+            if s.get("status") not in allowed_statuses:
                 continue
             if not effective_include_samples and s.get("is_sample", False):
                 continue
@@ -106,20 +133,30 @@ class FakeSchemeRepository:
             results.append(s)
 
         paged = results[skip : skip + limit]
-        return [Scheme.model_validate(r) for r in paged]
+        return [self._doc_to_scheme(r) for r in paged]
 
     async def count_verified(
         self,
         state: str | None = None,
         level: str | None = None,
         include_samples: bool | None = None,
+        include_unverified: bool | None = None,
     ) -> int:
         effective_include_samples = (
             self._include_sample_schemes if include_samples is None else include_samples
         )
+        effective_include_unverified = (
+            self._include_unverified_schemes
+            if include_unverified is None
+            else include_unverified
+        )
+        allowed_statuses = {SchemeStatus.VERIFIED.value}
+        if effective_include_unverified:
+            allowed_statuses.add(SchemeStatus.NEEDS_REVIEW.value)
+
         count = 0
         for s in self._schemes.values():
-            if s.get("status") != SchemeStatus.VERIFIED.value:
+            if s.get("status") not in allowed_statuses:
                 continue
             if not effective_include_samples and s.get("is_sample", False):
                 continue
@@ -136,7 +173,7 @@ class FakeSchemeRepository:
         doc = scheme.model_dump()
         doc["id"] = str(uuid.uuid4())
         self._schemes[scheme.slug] = doc
-        return Scheme.model_validate(doc)
+        return self._doc_to_scheme(doc)
 
     async def update_scheme(
         self, slug: str, update_data: SchemeUpdate
@@ -149,7 +186,7 @@ class FakeSchemeRepository:
         updates["updated_at"] = datetime.now(UTC)
         existing.update(updates)
         self._schemes[clean_slug] = existing
-        return Scheme.model_validate(existing)
+        return self._doc_to_scheme(existing)
 
     async def delete_sample_schemes(self) -> int:
         to_delete = [

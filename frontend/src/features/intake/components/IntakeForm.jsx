@@ -8,7 +8,7 @@ export function IntakeForm() {
         Describe your family situation, occupation, state, and income in plain words.
       </p>
       <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs text-emerald-700">
-        🔒 Profiles stay in browser memory. No Aadhaar, phone, or bank details collected.
+        🔒 We do not save your details. Held only in this page's memory. No Aadhaar, phone, or bank details collected.
       </div>
     </div>
   );

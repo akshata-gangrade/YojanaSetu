@@ -84,9 +84,16 @@ async def test_scheme_repo_create_and_get_by_slug(
 @pytest.mark.asyncio
 async def test_scheme_repo_only_returns_verified_schemes(
     sample_scheme_create: SchemeCreate,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Invariant: Only schemes with status 'verified' are returned to users."""
-    repo = FakeSchemeRepository()
+    """Invariant: Only schemes with status 'verified' are returned to users when PUBLISH_UNREVIEWED_SCHEMES is false."""
+    from app.core.config import get_settings
+
+    monkeypatch.setattr(
+        "app.core.config.get_settings",
+        lambda: get_settings().model_copy(update={"PUBLISH_UNREVIEWED_SCHEMES": False}),
+    )
+    repo = FakeSchemeRepository(include_unverified_schemes=False)
 
     # 1. Verified scheme
     await repo.create_scheme(sample_scheme_create)
@@ -172,6 +179,72 @@ async def test_scheme_repo_respects_include_sample_schemes_setting(
     results_enabled = await repo_enabled.get_verified_schemes()
     assert len(results_enabled) == 2
     assert await repo_enabled.count_verified() == 2
+
+
+@pytest.mark.asyncio
+async def test_repository_filtering_respects_include_unverified_schemes(
+    sample_scheme_create: SchemeCreate,
+) -> None:
+    """Verify repository filtering in each case: verified vs needs_review vs draft vs archived."""
+    verified = sample_scheme_create.model_copy(
+        update={"slug": "verified-scheme", "status": SchemeStatus.VERIFIED}
+    )
+    needs_review = sample_scheme_create.model_copy(
+        update={"slug": "needs-review-scheme", "status": SchemeStatus.NEEDS_REVIEW}
+    )
+    draft = sample_scheme_create.model_copy(
+        update={"slug": "draft-scheme", "status": SchemeStatus.DRAFT}
+    )
+    archived = sample_scheme_create.model_copy(
+        update={"slug": "archived-scheme", "status": SchemeStatus.ARCHIVED}
+    )
+
+    # 1. When include_unverified_schemes is False (default)
+    repo_default = FakeSchemeRepository(include_unverified_schemes=False)
+    await repo_default.create_scheme(verified)
+    await repo_default.create_scheme(needs_review)
+    await repo_default.create_scheme(draft)
+    await repo_default.create_scheme(archived)
+
+    results_default = await repo_default.get_verified_schemes()
+    assert len(results_default) == 1
+    assert results_default[0].slug == "verified-scheme"
+    assert results_default[0].is_verified is True
+    assert await repo_default.count_verified() == 1
+
+    # 2. When include_unverified_schemes is True (demo mode)
+    repo_demo = FakeSchemeRepository(include_unverified_schemes=True)
+    await repo_demo.create_scheme(verified)
+    await repo_demo.create_scheme(needs_review)
+    await repo_demo.create_scheme(draft)
+    await repo_demo.create_scheme(archived)
+
+    results_demo = await repo_demo.get_verified_schemes()
+    assert len(results_demo) == 2
+    demo_slugs = [s.slug for s in results_demo]
+    assert "verified-scheme" in demo_slugs
+    assert "needs-review-scheme" in demo_slugs
+    assert "draft-scheme" not in demo_slugs
+    assert "archived-scheme" not in demo_slugs
+
+    # Verify is_verified property on each
+    for s in results_demo:
+        if s.slug == "verified-scheme":
+            assert s.is_verified is True
+        elif s.slug == "needs-review-scheme":
+            assert s.is_verified is False
+
+    assert await repo_demo.count_verified() == 2
+
+    # 3. Explicit override parameter
+    override_results = await repo_default.get_verified_schemes(include_unverified=True)
+    assert len(override_results) == 2
+    assert await repo_default.count_verified(include_unverified=True) == 2
+
+    override_false = await repo_demo.get_verified_schemes(include_unverified=False)
+    assert len(override_false) == 1
+    assert override_false[0].slug == "verified-scheme"
+    assert await repo_demo.count_verified(include_unverified=False) == 1
 
 
 @pytest.mark.asyncio

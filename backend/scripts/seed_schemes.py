@@ -27,7 +27,7 @@ from app.schemas.enums import (  # noqa: E402
     SchemeLevel,
     SchemeStatus,
 )
-from app.schemas.scheme import SchemeCreate  # noqa: E402
+from app.schemas.scheme import SchemeCreate, SchemeUpdate  # noqa: E402
 
 # 5 Clearly labelled FICTIONAL sample schemes for development and manual evaluation
 SAMPLE_SCHEMES: list[SchemeCreate] = [
@@ -320,10 +320,10 @@ async def seed_samples(repo: SchemeRepository) -> None:
         existing = await repo.get_by_slug(sample.slug)
         if existing:
             logger.info("Updating existing sample scheme '%s'...", sample.slug)
-            await repo.update_scheme(
-                sample.slug,
-                sample.model_dump(exclude={"created_at"}),
+            update_data = SchemeUpdate.model_validate(
+                sample.model_dump(exclude={"created_at"})
             )
+            await repo.update_scheme(sample.slug, update_data)
             updated_count += 1
         else:
             logger.info("Inserting sample scheme '%s'...", sample.slug)

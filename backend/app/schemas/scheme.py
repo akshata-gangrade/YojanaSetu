@@ -156,6 +156,7 @@ class SchemeUpdate(BaseModel):
     verified_at: datetime | None = None
     last_verified: datetime | None = None
     is_sample: bool | None = None
+    is_verified: bool | None = None
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -166,5 +167,15 @@ class Scheme(SchemeBase):
         default=None,
         description="MongoDB document identifier string.",
     )
+    is_verified: bool = Field(
+        default=False,
+        description="True only when status is verified.",
+    )
     created_at: datetime
     updated_at: datetime
+
+    @model_validator(mode="after")
+    def compute_is_verified(self) -> "Scheme":
+        """Ensure is_verified is strictly true only when status is verified."""
+        self.is_verified = self.status == SchemeStatus.VERIFIED
+        return self

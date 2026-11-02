@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useEligibility } from '../context/EligibilityContext';
 import { ResultSchemeCard } from '../features/results/components/ResultSchemeCard';
 import { ResultsTabs } from '../features/results/components/ResultsTabs';
-import { Card, EmptyState, Button } from '../components/ui';
+import { Card, EmptyState, Button, Alert } from '../components/ui';
 
 export function ResultsPage() {
   const { t } = useTranslation();
@@ -50,6 +50,10 @@ export function ResultsPage() {
     window.print();
   };
 
+  const hasUnverified = useMemo(() => {
+    return filteredList.some((s) => s.is_verified === false);
+  }, [filteredList]);
+
   // If page was refreshed or visited directly without profile in memory
   if (!matchResults || !hasAtLeastOneField) {
     return (
@@ -59,7 +63,7 @@ export function ResultsPage() {
             title={t('results.noProfileTitle', 'No Profile in Memory')}
             description={t(
               'results.noProfileDesc',
-              'For your privacy, citizen details are never stored on servers, in cookies, or in local storage. All temporary profile memory is erased on page refresh. Please check your eligibility again.'
+              'For your privacy, we do not save your details on our servers or in your browser storage. They are held only in this page\'s memory and are cleared when you refresh or close the tab. Please check your eligibility again.'
             )}
             action={
               <Link to="/check-eligibility" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy rounded">
@@ -76,6 +80,15 @@ export function ResultsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 py-6 sm:py-8" data-results-page>
+      {hasUnverified && (
+        <Alert variant="warning" role="alert" data-demo-banner>
+          {t(
+            'schemes.demoModeBanner',
+            'Demo mode: some schemes shown here have not been verified against official sources. Always confirm on the official website before applying.'
+          )}
+        </Alert>
+      )}
+
       {/* Top action row (hidden in print) */}
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <Button
@@ -110,6 +123,21 @@ export function ResultsPage() {
         </span>
       </div>
 
+      {/* Coverage Notice */}
+      <div
+        role="note"
+        className="rounded-lg border border-border-card bg-surface-page px-4 py-3 text-xs sm:text-sm text-text-muted"
+        data-coverage-notice
+      >
+        <span className="mr-1.5 font-bold text-navy" aria-hidden="true">📍</span>
+        <span>
+          {t(
+            'results.coverageNotice',
+            'We currently cover central schemes and Madhya Pradesh. Schemes for other states are not available yet.'
+          )}
+        </span>
+      </div>
+
       {/* Page Title */}
       <div className="space-y-1">
         <h1 className="text-2xl font-black tracking-tight text-navy sm:text-3xl lg:text-4xl">
@@ -118,7 +146,7 @@ export function ResultsPage() {
         <p className="text-sm text-text-muted">
           {t(
             'results.pageSubtitle',
-            'Evaluated deterministically in pure Python against official government gazettes.'
+            'Eligibility is decided by fixed rules against official government gazettes.'
           )}
         </p>
       </div>

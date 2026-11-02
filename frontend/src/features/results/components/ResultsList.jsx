@@ -7,7 +7,7 @@ export function ResultsList() {
       </div>
       <h3 className="text-md font-semibold text-slate-800">Qualified Schemes</h3>
       <p className="text-sm text-slate-500">
-        Results determined by deterministic qualification rules.
+        Results determined by fixed eligibility rules, not by AI.
       </p>
     </div>
   );

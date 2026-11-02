@@ -1,5 +1,7 @@
 """MongoDB client management and database lifecycle using AsyncMongoClient."""
 
+import asyncio
+
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.database import AsyncDatabase
 
@@ -14,6 +16,16 @@ class MongoDBManager:
     @classmethod
     def get_client(cls) -> AsyncMongoClient:
         """Obtain or initialize the shared PyMongo AsyncMongoClient."""
+        try:
+            current_loop = asyncio.get_running_loop()
+        except RuntimeError:
+            current_loop = None
+
+        if cls.client is not None and current_loop is not None:
+            client_loop = getattr(cls.client, "_loop", None)
+            if client_loop is not None and client_loop is not current_loop:
+                cls.client = None
+
         if cls.client is None:
             settings = get_settings()
             cls.client = AsyncMongoClient(
@@ -36,8 +48,12 @@ class MongoDBManager:
     async def close_client(cls) -> None:
         """Close active client connection pool asynchronously."""
         if cls.client is not None:
-            await cls.client.aclose()
+            client = cls.client
             cls.client = None
+            try:
+                await client.aclose()
+            except Exception:
+                pass
 
 
 async def get_db() -> AsyncDatabase:

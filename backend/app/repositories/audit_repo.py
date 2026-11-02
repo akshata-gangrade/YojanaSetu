@@ -48,8 +48,9 @@ class AuditRepository:
 
         doc = entry.model_dump()
         result = await self.collection.insert_one(doc)
-        doc["id"] = str(result.inserted_id)
-        return AuditLog.model_validate(doc)
+        if "_id" not in doc and hasattr(result, "inserted_id"):
+            doc["_id"] = result.inserted_id
+        return self._doc_to_audit(doc)
 
     async def get_by_target(self, target: str, limit: int = 50) -> list[AuditLog]:
         """Query audit log history for a specific target in reverse order."""

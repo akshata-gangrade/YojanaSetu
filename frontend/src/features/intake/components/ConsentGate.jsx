@@ -10,7 +10,7 @@ export function ConsentGate({ onConsent }) {
         {/* Header Badge & Title */}
         <div className="space-y-2">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-navy/30 bg-[#EBF1FA] px-3 py-1 text-xs font-bold text-navy">
-            <span>🔒 {t('intake.consent.badge', 'Zero Data Storage • Privacy First')}</span>
+            <span>🔒 {t('intake.consent.badge', 'No data saved • Privacy First')}</span>
           </div>
 
           <h2 className="text-2xl font-black tracking-tight text-navy sm:text-3xl">
@@ -55,7 +55,7 @@ export function ConsentGate({ onConsent }) {
               <span className="text-text-muted">
                 {t(
                   'intake.consent.point2Desc',
-                  'Your profile lives strictly in temporary browser memory. When you refresh or close the tab, all details are erased instantly.'
+                  'We do not save your details on our servers or in your browser storage. They are held only in this page\'s memory and are cleared when you refresh or close the tab.'
                 )}
               </span>
             </div>
@@ -72,7 +72,7 @@ export function ConsentGate({ onConsent }) {
               <span className="text-text-muted">
                 {t(
                   'intake.consent.point3Desc',
-                  'Natural language descriptions are processed by an AI service solely to extract criteria. Qualification decisions are made strictly by deterministic rule algorithms.'
+                  'What you type is sent to our server and to an AI service so it can understand your situation. We do not save it, and the AI service has its own privacy policy. The AI never decides eligibility. Fixed rules do.'
                 )}
               </span>
             </div>

@@ -4,12 +4,18 @@ import { askSchemeQuestion } from '../api/schemeApi';
 import { Button, Alert, Card } from '../../../components/ui';
 
 export function SchemeAskBox({ slug }) {
+  const isAskEnabled = import.meta.env.VITE_ENABLE_ASK === 'true';
+
   const { t, i18n } = useTranslation();
   const [question, setQuestion] = useState('');
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSlow, setIsSlow] = useState(false);
   const [error, setError] = useState(null);
+
+  if (!isAskEnabled) {
+    return null;
+  }
 
   const MAX_CHARS = 500;
 

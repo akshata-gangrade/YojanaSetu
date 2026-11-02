@@ -25,7 +25,7 @@ A citizen describes their situation in plain English or Hindi, and YojanaSetu sh
 ## 🛠️ Tech Stack
 
 - **Frontend:** React 18, Vite, Tailwind CSS, Lucide Icons, ESLint, Prettier, Vitest.
-- **Backend:** Python 3.11+, FastAPI, Pydantic v2, pydantic-settings, Motor (MongoDB async driver), Pytest, Ruff, Black.
+- **Backend:** Python 3.11+, FastAPI, Pydantic v2, pydantic-settings, PyMongo 4.9+ (native AsyncMongoClient), Pytest, Ruff, Black.
 - **Database & Search:** MongoDB Atlas with Atlas Vector Search.
 - **AI & Embeddings:** Groq Cloud API (Llama-family model), hosted multilingual embeddings via `EmbeddingClient`.
 - **Infrastructure:** Docker, Vercel (Frontend), Render (Backend).

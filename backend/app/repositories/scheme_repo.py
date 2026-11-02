@@ -34,13 +34,37 @@ class SchemeRepository:
 
     def _build_whitelisted_query(
         self,
-        status: SchemeStatus = SchemeStatus.VERIFIED,
+        status: SchemeStatus | list[SchemeStatus] = SchemeStatus.VERIFIED,
         state: str | None = None,
         level: str | None = None,
         include_samples: bool = False,
+        include_unverified: bool = False,
     ) -> dict[str, Any]:
         """Build query filter exclusively from strictly validated fields."""
-        query: dict[str, Any] = {"status": status.value}
+        if include_unverified:
+            query: dict[str, Any] = {
+                "status": {
+                    "$in": [
+                        SchemeStatus.VERIFIED.value,
+                        SchemeStatus.NEEDS_REVIEW.value,
+                    ]
+                }
+            }
+        elif isinstance(status, list):
+            query = {
+                "status": {
+                    "$in": [
+                        s.value if isinstance(s, SchemeStatus) else str(s)
+                        for s in status
+                    ]
+                }
+            }
+        else:
+            query = {
+                "status": (
+                    status.value if isinstance(status, SchemeStatus) else str(status)
+                )
+            }
 
         if not include_samples:
             query["is_sample"] = False
@@ -145,6 +169,7 @@ class SchemeRepository:
         state: str | None = None,
         level: str | None = None,
         include_samples: bool | None = None,
+        include_unverified: bool | None = None,
     ) -> list[Scheme]:
         """Fetch paginated verified schemes matching whitelisted filter criteria."""
         bounded_skip = max(0, skip)
@@ -155,12 +180,18 @@ class SchemeRepository:
             if include_samples is None
             else include_samples
         )
+        effective_include_unverified = (
+            get_settings().PUBLISH_UNREVIEWED_SCHEMES
+            if include_unverified is None
+            else include_unverified
+        )
 
         query = self._build_whitelisted_query(
             status=SchemeStatus.VERIFIED,
             state=state,
             level=level,
             include_samples=effective_include_samples,
+            include_unverified=effective_include_unverified,
         )
 
         cursor = self.collection.find(query).skip(bounded_skip).limit(bounded_limit)
@@ -172,6 +203,7 @@ class SchemeRepository:
         state: str | None = None,
         level: str | None = None,
         include_samples: bool | None = None,
+        include_unverified: bool | None = None,
     ) -> int:
         """Count verified schemes matching whitelisted filter criteria."""
         effective_include_samples = (
@@ -179,11 +211,17 @@ class SchemeRepository:
             if include_samples is None
             else include_samples
         )
+        effective_include_unverified = (
+            get_settings().PUBLISH_UNREVIEWED_SCHEMES
+            if include_unverified is None
+            else include_unverified
+        )
         query = self._build_whitelisted_query(
             status=SchemeStatus.VERIFIED,
             state=state,
             level=level,
             include_samples=effective_include_samples,
+            include_unverified=effective_include_unverified,
         )
         return await self.collection.count_documents(query)
 
@@ -191,8 +229,9 @@ class SchemeRepository:
         """Insert a newly structured scheme record."""
         doc = scheme.model_dump()
         result = await self.collection.insert_one(doc)
-        doc["id"] = str(result.inserted_id)
-        return Scheme.model_validate(doc)
+        if "_id" not in doc and hasattr(result, "inserted_id"):
+            doc["_id"] = result.inserted_id
+        return self._doc_to_scheme(doc)
 
     async def update_scheme(
         self, slug: str, update_data: SchemeUpdate

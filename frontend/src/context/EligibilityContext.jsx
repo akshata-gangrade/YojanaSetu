@@ -78,7 +78,7 @@ export function EligibilityProvider({ children }) {
       sender: 'assistant',
       text: t(
         'intake.chat.welcomeMessage',
-        'Namaste! Describe your situation in English or Hindi (e.g., "I am a 28-year-old farmer from Uttar Pradesh with an annual income of ₹1.5 lakh"). You can also edit your details directly in the panel.'
+        'Namaste! Describe your situation in English or Hindi (e.g., "I am a 28-year-old farmer from Madhya Pradesh with an annual income of ₹1.5 lakh"). You can also edit your details directly in the panel.'
       ),
       quickReplies: [],
       timestamp: new Date().toISOString(),
@@ -146,7 +146,7 @@ export function EligibilityProvider({ children }) {
         sender: 'assistant',
         text: t(
           'intake.chat.welcomeMessage',
-          'Namaste! Describe your situation in English or Hindi (e.g., "I am a 28-year-old farmer from Uttar Pradesh with an annual income of ₹1.5 lakh"). You can also edit your details directly in the panel.'
+          'Namaste! Describe your situation in English or Hindi (e.g., "I am a 28-year-old farmer from Madhya Pradesh with an annual income of ₹1.5 lakh"). You can also edit your details directly in the panel.'
         ),
         quickReplies: [],
         timestamp: new Date().toISOString(),
@@ -268,7 +268,7 @@ export function EligibilityProvider({ children }) {
     [profile, isLoading, i18n.language, t, updateProfile]
   );
 
-  // Evaluates profile deterministically in Python rule engine via POST /api/v1/match
+  // Evaluates profile via fixed rules in Python rule engine via POST /api/v1/match
   const evaluateEligibility = useCallback(async () => {
     if (isLoading) return null;
 

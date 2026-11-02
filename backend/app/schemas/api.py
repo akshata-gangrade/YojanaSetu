@@ -87,6 +87,10 @@ class SchemeMatchItem(BaseModel):
     last_verified: datetime
     reasons: list[str] = Field(default_factory=list)
     status: str = Field(description="Qualification status ('eligible', 'maybe', 'not_eligible').")
+    is_verified: bool = Field(
+        default=False,
+        description="True only when scheme verification status is verified.",
+    )
 
 
 class MatchResponse(BaseModel):

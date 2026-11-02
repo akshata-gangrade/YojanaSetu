@@ -48,6 +48,18 @@ export function SchemeDetailPage() {
 
   return (
     <div className="mx-auto max-w-4xl py-6 sm:py-8" data-scheme-detail-page>
+      {/* Demo mode banner */}
+      {scheme && scheme.is_verified === false && (
+        <div className="mb-6">
+          <Alert variant="warning" role="alert" data-demo-banner>
+            {t(
+              'schemes.demoModeBanner',
+              'Demo mode: some schemes shown here have not been verified against official sources. Always confirm on the official website before applying.'
+            )}
+          </Alert>
+        </div>
+      )}
+
       {/* Slow server alert */}
       {isSlow && (
         <div className="mb-6">

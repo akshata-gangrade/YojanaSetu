@@ -23,6 +23,37 @@ def test_settings_valid_development():
     assert settings.MONGODB_DB == "yojanasetu"
     assert settings.ACCESS_TOKEN_MINUTES == 60
     assert settings.INCLUDE_SAMPLE_SCHEMES is False
+    assert settings.PUBLISH_UNREVIEWED_SCHEMES is True
+
+
+def test_settings_production_allows_publish_unreviewed_schemes():
+    """Verify production mode allows PUBLISH_UNREVIEWED_SCHEMES (no production restriction)."""
+    settings = Settings(
+        _env_file=None,
+        ENV="production",
+        MONGODB_URI="mongodb+srv://atlas.mongodb.net",
+        MONGODB_DB="yojanasetu",
+        GROQ_API_KEY="test_key",
+        EMBEDDING_API_KEY="test_embed_key",
+        JWT_SECRET="a_very_secure_production_secret_key_exceeding_32_characters",
+        PUBLISH_UNREVIEWED_SCHEMES=True,
+    )
+    assert settings.PUBLISH_UNREVIEWED_SCHEMES is True
+
+
+def test_settings_development_allows_publish_unreviewed_schemes():
+    """Verify development mode permits toggling PUBLISH_UNREVIEWED_SCHEMES."""
+    settings = Settings(
+        _env_file=None,
+        ENV="development",
+        MONGODB_URI="mongodb://localhost:27017",
+        MONGODB_DB="yojanasetu",
+        GROQ_API_KEY="test_key",
+        EMBEDDING_API_KEY="test_embed_key",
+        JWT_SECRET="dev_secret_key",
+        PUBLISH_UNREVIEWED_SCHEMES=False,
+    )
+    assert settings.PUBLISH_UNREVIEWED_SCHEMES is False
 
 
 def test_settings_production_rejects_include_sample_schemes():

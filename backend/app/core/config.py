@@ -115,6 +115,11 @@ class Settings(BaseSettings):
         default=False,
         description="Whether public queries include fictional sample schemes.",
     )
+    # Whether public queries include unreviewed schemes awaiting verification
+    PUBLISH_UNREVIEWED_SCHEMES: bool = Field(
+        default=True,
+        description="Whether public queries include unreviewed schemes awaiting verification.",
+    )
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
     @classmethod

@@ -89,7 +89,7 @@ export function Footer() {
                   to="/privacy"
                   className="inline-flex min-h-[36px] items-center rounded hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9933]"
                 >
-                  {t('nav.privacy', 'Privacy Policy (Zero Data Persistence)')}
+                  {t('nav.privacy', 'Privacy Policy')}
                 </Link>
               </li>
               <li>

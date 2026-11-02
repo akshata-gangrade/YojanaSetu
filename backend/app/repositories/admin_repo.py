@@ -35,8 +35,9 @@ class AdminRepository:
         doc = user.model_dump()
         doc["email"] = doc["email"].strip().lower()
         result = await self.collection.insert_one(doc)
-        doc["id"] = str(result.inserted_id)
-        return AdminUserInDB.model_validate(doc)
+        if "_id" not in doc and hasattr(result, "inserted_id"):
+            doc["_id"] = result.inserted_id
+        return self._doc_to_admin(doc)
 
     async def update_login_attempts(
         self, email: str, failed_logins: int, locked_until: datetime | None

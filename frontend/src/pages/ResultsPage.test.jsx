@@ -177,4 +177,55 @@ describe('ResultsPage Component', () => {
     expect(sessionStorage.getItem('profile')).toBeNull();
     expect(document.cookie).toBe('');
   });
+
+  it('renders state coverage notice for central schemes and Madhya Pradesh', () => {
+    renderResultsWithContext();
+
+    expect(
+      screen.getByText(
+        /We currently cover central schemes and Madhya Pradesh|हम वर्तमान में केंद्रीय योजनाओं और मध्य प्रदेश को कवर करते हैं/i
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('renders demo mode banner and unverified badge on cards when is_verified is false', () => {
+    const unverifiedResults = {
+      eligible: [
+        {
+          slug: 'unverified-scheme',
+          name: 'Demo Unverified Scheme',
+          name_hi: 'डेमो असत्यापित योजना',
+          level: 'central',
+          state: null,
+          category_tags: ['agriculture'],
+          benefit_summary: 'Demo benefits summary.',
+          benefit_summary_hi: 'डेमो लाभ विवरण।',
+          apply_url: 'https://example.com/apply',
+          source_url: 'https://example.com/source',
+          last_verified: '2026-10-25T00:00:00Z',
+          reasons: ['Occupation is farmer ✓'],
+          status: 'eligible',
+          is_verified: false,
+        },
+      ],
+      maybe: [],
+      not_eligible: [],
+    };
+
+    renderResultsWithContext({ matchResults: unverifiedResults });
+
+    // Top banner is shown
+    expect(
+      screen.getByText(/Demo mode: some schemes shown here have not been verified against official sources/i)
+    ).toBeInTheDocument();
+
+    // Badge "Unverified demo data" is shown on card
+    expect(screen.getByText(/Unverified demo data|असत्यापित डेमो डेटा/i)).toBeInTheDocument();
+
+    // "Verified on" is replaced with "Not yet verified against the official source"
+    expect(
+      screen.getByText(/Not yet verified against the official source|आधिकारिक स्रोत से अभी तक सत्यापित नहीं/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Verified on:/i)).not.toBeInTheDocument();
+  });
 });

@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from app.core.config import Settings
 from app.repositories.base import ISchemeRepository
 from app.schemas.api import IntakeExtractResponse
 from app.schemas.enums import CriterionField
@@ -20,11 +21,13 @@ class IntakeService:
         scheme_repo: ISchemeRepository,
         rule_engine: RuleEngineService | None = None,
         followup_selector: FollowupSelectorService | None = None,
+        settings: Settings | None = None,
     ):
         self.extractor = extractor
         self.scheme_repo = scheme_repo
         self.rule_engine = rule_engine or RuleEngineService()
         self.followup_selector = followup_selector or FollowupSelectorService(self.rule_engine)
+        self.settings = settings
 
     async def process_intake(
         self,
@@ -61,8 +64,18 @@ class IntakeService:
         except Exception:
             merged_profile = current_profile or UserProfile()
 
-        # 3. Retrieve verified schemes from repository
-        verified_schemes = await self.scheme_repo.get_verified_schemes(limit=100)
+        effective_include_samples = (
+            self.settings.INCLUDE_SAMPLE_SCHEMES if self.settings else None
+        )
+        effective_include_unreviewed = (
+            self.settings.PUBLISH_UNREVIEWED_SCHEMES if self.settings else None
+        )
+        # 3. Retrieve candidate schemes from repository
+        verified_schemes = await self.scheme_repo.get_verified_schemes(
+            limit=100,
+            include_samples=effective_include_samples,
+            include_unverified=effective_include_unreviewed,
+        )
 
         # 4. Pre-filter and evaluate candidate schemes
         prefiltered = self.rule_engine.prefilter_schemes(verified_schemes, merged_profile)

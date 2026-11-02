@@ -30,7 +30,7 @@ from app.api.deps import (
     get_rag_service,
     get_scheme_repo,
 )
-from app.core.config import Settings
+from app.core.config import Settings, get_settings
 from app.core.rate_limit import InMemoryRateLimiter, rate_limiter
 from app.main import create_app
 from app.repositories.fakes import FakeFeedbackRepository, FakeSchemeRepository
@@ -283,9 +283,11 @@ async def test_match_endpoint_success_no_llm_called(
     # UP Vridha should be eligible (age >= 60, state == uttar_pradesh)
     assert "up-vridha-test" in eligible_slugs
 
-    # Verify verified date is present
+    # Verify verified date and is_verified boolean is present
     for item in data["eligible"]:
         assert "last_verified" in item
+        assert "is_verified" in item
+        assert item["is_verified"] is True
         assert len(item["reasons"]) > 0
 
     # Invariant: LLM must NEVER be called in match endpoint
@@ -304,6 +306,8 @@ async def test_schemes_list_paginated_and_verified_only(test_client: AsyncClient
     slugs = [s["slug"] for s in data["items"]]
     assert "pm-kisan-test" in slugs
     assert "up-vridha-test" in slugs
+    for item in data["items"]:
+        assert item["is_verified"] is True
     # Draft scheme must NOT be returned
     assert "draft-scheme-unverified" not in slugs
 
@@ -314,6 +318,7 @@ async def test_schemes_get_by_slug_success_and_not_found(test_client: AsyncClien
     resp = await test_client.get("/api/v1/schemes/pm-kisan-test")
     assert resp.status_code == 200
     assert resp.json()["slug"] == "pm-kisan-test"
+    assert resp.json()["is_verified"] is True
 
     # Non-existent slug -> 404
     resp_404 = await test_client.get("/api/v1/schemes/non-existent-scheme")
@@ -325,6 +330,202 @@ async def test_schemes_get_by_slug_success_and_not_found(test_client: AsyncClien
     # Draft unverified scheme -> 404
     resp_draft = await test_client.get("/api/v1/schemes/draft-scheme-unverified")
     assert resp_draft.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_demo_mode_unverified_schemes(api_test_settings: Settings):
+    """Test unreviewed mode: PUBLISH_UNREVIEWED_SCHEMES=True enables needs_review schemes (never draft or archived)."""
+    # 1. Setup repository with verified, needs_review, draft, and archived schemes
+    demo_repo = FakeSchemeRepository(include_unverified_schemes=True)
+    feedback_repo = FakeFeedbackRepository()
+
+    now = datetime.now(UTC)
+    verified_scheme = SchemeCreate(
+        slug="demo-verified",
+        name="Demo Verified Scheme",
+        name_hi="डेमो सत्यापित योजना",
+        level=SchemeLevel.CENTRAL,
+        state=None,
+        benefit_summary="Verified demo benefits summary text.",
+        benefit_summary_hi="सत्यापित लाभ विवरण पाठ।",
+        apply_url="https://example.com/apply",
+        source_url="https://example.com/source.pdf",
+        source_hash="d" * 64,
+        status=SchemeStatus.VERIFIED,
+        last_verified=now,
+    )
+    needs_review_scheme = SchemeCreate(
+        slug="demo-needs-review",
+        name="Demo Needs Review Scheme",
+        name_hi="डेमो समीक्षाधीन योजना",
+        level=SchemeLevel.CENTRAL,
+        state=None,
+        benefit_summary="Unverified demo benefits summary text.",
+        benefit_summary_hi="असत्यापित लाभ विवरण पाठ।",
+        apply_url="https://example.com/apply",
+        source_url="https://example.com/source.pdf",
+        source_hash="e" * 64,
+        status=SchemeStatus.NEEDS_REVIEW,
+        last_verified=now,
+    )
+    draft_scheme = SchemeCreate(
+        slug="demo-draft",
+        name="Demo Draft Scheme",
+        name_hi="डेमो ड्राफ्ट योजना",
+        level=SchemeLevel.CENTRAL,
+        state=None,
+        benefit_summary="Draft demo benefits summary text.",
+        benefit_summary_hi="ड्राफ्ट लाभ विवरण पाठ।",
+        apply_url="https://example.com/apply",
+        source_url="https://example.com/source.pdf",
+        source_hash="f" * 64,
+        status=SchemeStatus.DRAFT,
+        last_verified=now,
+    )
+    archived_scheme = SchemeCreate(
+        slug="demo-archived",
+        name="Demo Archived Scheme",
+        name_hi="डेमो संग्रहीत योजना",
+        level=SchemeLevel.CENTRAL,
+        state=None,
+        benefit_summary="Archived demo benefits summary text.",
+        benefit_summary_hi="संग्रहीत लाभ विवरण पाठ।",
+        apply_url="https://example.com/apply",
+        source_url="https://example.com/source.pdf",
+        source_hash="0" * 64,
+        status=SchemeStatus.ARCHIVED,
+        last_verified=now,
+    )
+
+    await demo_repo.create_scheme(verified_scheme)
+    await demo_repo.create_scheme(needs_review_scheme)
+    await demo_repo.create_scheme(draft_scheme)
+    await demo_repo.create_scheme(archived_scheme)
+
+    # 2. Configure app with PUBLISH_UNREVIEWED_SCHEMES = True
+    demo_settings = api_test_settings.model_copy(
+        update={"PUBLISH_UNREVIEWED_SCHEMES": True}
+    )
+    demo_app = create_app(demo_settings)
+    rule_engine = RuleEngineService()
+    followup_selector = FollowupSelectorService(rule_engine)
+    extractor = ProfileExtractorService(AsyncMock())
+    intake_svc = IntakeService(extractor, demo_repo, rule_engine, followup_selector)
+    match_svc = MatchService(demo_repo, rule_engine, settings=demo_settings)
+    rag_svc = RAGService()
+
+    demo_app.dependency_overrides[get_settings] = lambda: demo_settings
+    demo_app.dependency_overrides[get_scheme_repo] = lambda: demo_repo
+    demo_app.dependency_overrides[get_feedback_repo] = lambda: feedback_repo
+    demo_app.dependency_overrides[get_intake_service] = lambda: intake_svc
+    demo_app.dependency_overrides[get_match_service] = lambda: match_svc
+    demo_app.dependency_overrides[get_rag_service] = lambda: rag_svc
+
+    transport = ASGITransport(app=demo_app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        # A. GET /schemes
+        resp = await client.get("/api/v1/schemes")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 2
+        returned_slugs = [s["slug"] for s in data["items"]]
+        assert "demo-verified" in returned_slugs
+        assert "demo-needs-review" in returned_slugs
+        assert "demo-draft" not in returned_slugs
+        assert "demo-archived" not in returned_slugs
+
+        for item in data["items"]:
+            if item["slug"] == "demo-verified":
+                assert item["is_verified"] is True
+            elif item["slug"] == "demo-needs-review":
+                assert item["is_verified"] is False
+
+        # B. GET /schemes/{slug}
+        # Verified scheme -> 200, is_verified True
+        resp_v = await client.get("/api/v1/schemes/demo-verified")
+        assert resp_v.status_code == 200
+        assert resp_v.json()["is_verified"] is True
+
+        # Needs review scheme -> 200, is_verified False
+        resp_nr = await client.get("/api/v1/schemes/demo-needs-review")
+        assert resp_nr.status_code == 200
+        assert resp_nr.json()["is_verified"] is False
+
+        # Draft scheme -> 404 (never returned)
+        resp_d = await client.get("/api/v1/schemes/demo-draft")
+        assert resp_d.status_code == 404
+
+        # Archived scheme -> 404 (never returned)
+        resp_a = await client.get("/api/v1/schemes/demo-archived")
+        assert resp_a.status_code == 404
+
+        # C. POST /match
+        match_payload = {
+            "profile": {
+                "age": 30,
+                "state": "bihar",
+            },
+            "language": "en",
+        }
+        resp_m = await client.post("/api/v1/match", json=match_payload)
+        assert resp_m.status_code == 200
+        m_data = resp_m.json()
+        all_matched = m_data["eligible"] + m_data["maybe"] + m_data["not_eligible"]
+        matched_slugs = [m["slug"] for m in all_matched]
+        assert "demo-verified" in matched_slugs
+        assert "demo-needs-review" in matched_slugs
+        assert "demo-draft" not in matched_slugs
+        assert "demo-archived" not in matched_slugs
+
+        for m in all_matched:
+            if m["slug"] == "demo-verified":
+                assert m["is_verified"] is True
+            elif m["slug"] == "demo-needs-review":
+                assert m["is_verified"] is False
+
+    # 3. Now verify with settings PUBLISH_UNREVIEWED_SCHEMES=False:
+    # Same repo but with include_unverified_schemes=False
+    default_repo = FakeSchemeRepository(include_unverified_schemes=False)
+    await default_repo.create_scheme(verified_scheme)
+    await default_repo.create_scheme(needs_review_scheme)
+    await default_repo.create_scheme(draft_scheme)
+    await default_repo.create_scheme(archived_scheme)
+
+    normal_settings = api_test_settings.model_copy(
+        update={"PUBLISH_UNREVIEWED_SCHEMES": False}
+    )
+    normal_app = create_app(normal_settings)
+    normal_match_svc = MatchService(default_repo, rule_engine, settings=normal_settings)
+    normal_app.dependency_overrides[get_settings] = lambda: normal_settings
+    normal_app.dependency_overrides[get_scheme_repo] = lambda: default_repo
+    normal_app.dependency_overrides[get_match_service] = lambda: normal_match_svc
+
+    transport_normal = ASGITransport(app=normal_app)
+    async with AsyncClient(transport=transport_normal, base_url="http://test") as client:
+        # GET /schemes -> only verified
+        r_list = await client.get("/api/v1/schemes")
+        assert r_list.status_code == 200
+        normal_slugs = [s["slug"] for s in r_list.json()["items"]]
+        assert "demo-verified" in normal_slugs
+        assert "demo-needs-review" not in normal_slugs
+
+        # GET /schemes/demo-needs-review -> 404
+        r_nr = await client.get("/api/v1/schemes/demo-needs-review")
+        assert r_nr.status_code == 404
+
+        # POST /match -> only verified
+        r_match = await client.post("/api/v1/match", json=match_payload)
+        assert r_match.status_code == 200
+        normal_matched_slugs = [
+            m["slug"]
+            for m in (
+                r_match.json()["eligible"]
+                + r_match.json()["maybe"]
+                + r_match.json()["not_eligible"]
+            )
+        ]
+        assert "demo-verified" in normal_matched_slugs
+        assert "demo-needs-review" not in normal_matched_slugs
 
 
 @pytest.mark.asyncio

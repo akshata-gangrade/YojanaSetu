@@ -658,10 +658,18 @@ async def test_verified_scheme_appears_in_public_api_and_rejected_does_not(
     admin_client: AsyncClient,
     make_auth_header,
     seeded_admin_repos,
+    admin_test_settings: Settings,
 ):
     """Verified scheme appears in public /api/v1/schemes; draft/rejected does not."""
     scheme_repo, _, _, _ = seeded_admin_repos
     reviewer_header = make_auth_header(TEST_REVIEWER_EMAIL, AdminRole.REVIEWER)
+
+    # Invariant: assert only verified schemes are returned when PUBLISH_UNREVIEWED_SCHEMES is false
+    custom_settings = admin_test_settings.model_copy(
+        update={"PUBLISH_UNREVIEWED_SCHEMES": False}
+    )
+    scheme_repo._include_unverified_schemes = False
+    admin_client._transport.app.dependency_overrides[get_settings] = lambda: custom_settings
 
     # 1. Create a scheme (starts in needs_review)
     scheme = SchemeCreate(

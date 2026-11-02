@@ -13,11 +13,20 @@ function renderAskBox(slug = 'pm-kisan') {
 }
 
 describe('SchemeAskBox', () => {
+  const originalEnv = import.meta.env.VITE_ENABLE_ASK;
+
   beforeEach(() => {
     vi.restoreAllMocks();
+    import.meta.env.VITE_ENABLE_ASK = 'true';
   });
 
-  it('renders input with character limit of 500', () => {
+  it('renders null when VITE_ENABLE_ASK is not true', () => {
+    import.meta.env.VITE_ENABLE_ASK = 'false';
+    const { container } = renderAskBox();
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('renders input with character limit of 500 when enabled', () => {
     renderAskBox();
 
     const textarea = screen.getByLabelText(/Question about scheme guidelines|योजना दिशानिर्देशों के बारे में प्रश्न/i);

@@ -43,7 +43,7 @@ export function PrivacyPage() {
           <p>
             {t(
               'pages.privacy.noPiiText',
-              'We never ask for, collect, or store Aadhaar numbers, PAN cards, voter IDs, phone numbers, email addresses, names, or bank account details. Any temporary input provided during an eligibility check is processed solely in transient browser memory.'
+              'We never ask for, collect, or store Aadhaar numbers, PAN cards, voter IDs, phone numbers, email addresses, names, or bank account details. We do not save your details on our servers or in your browser storage. They are held only in this page\'s memory and are cleared when you refresh or close the tab.'
             )}
           </p>
           <div className="space-y-2 rounded-lg border border-border bg-surface-page p-4 text-xs text-text-muted sm:text-sm">

@@ -166,5 +166,41 @@ describe('SchemeDetailPage', () => {
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/PM Kisan Samman Nidhi/i);
     });
   });
+
+  it('renders demo mode banner, unverified badge, and replaces verified on line when is_verified is false', async () => {
+    const unverifiedScheme = {
+      ...mockScheme,
+      slug: 'demo-unverified',
+      name: 'Demo Unverified Scheme',
+      is_verified: false,
+    };
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => unverifiedScheme,
+      headers: new Headers(),
+    });
+
+    renderDetail('demo-unverified');
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/Demo Unverified Scheme/i);
+    });
+
+    // Top banner is shown
+    expect(
+      screen.getByText(/Demo mode: some schemes shown here have not been verified against official sources/i)
+    ).toBeInTheDocument();
+
+    // Badge "Unverified demo data" is shown
+    expect(screen.getByText(/Unverified demo data|असत्यापित डेमो डेटा/i)).toBeInTheDocument();
+
+    // "Verified on" is replaced with "Not yet verified against the official source"
+    expect(
+      screen.getByText(/Not yet verified against the official source|आधिकारिक स्रोत से अभी तक सत्यापित नहीं/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Verified on:/i)).not.toBeInTheDocument();
+  });
 });
 

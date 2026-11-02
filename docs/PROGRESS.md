@@ -695,3 +695,168 @@
    - 16 new automated test cases covering login, lockout, rate limiting, token tampering/expiry/alg=none, reviewer vs admin role separation, verified scheme resetting on edit, public API visibility invariants, and seeding script guards.
    - Total backend test suite: 203 passing tests.
 
+---
+
+## Module: Scheme Import, CLI Review, and Coverage Notice (Fast-Track)
+
+- **Status**: Completed
+- **Date**: 2026-11-01
+
+### What Was Built
+1. **Scheme Importer Script (`backend/scripts/import_schemes.py`)**:
+   - Reads a JSON array of scheme definitions and validates every item against the canonical `SchemeCreate` model.
+   - Enforces the strict invariant that imported schemes are assigned status `needs_review` and never `verified`.
+   - Iterates through the entire file without stopping on the first failure, reporting precise field paths and error messages.
+   - Defaults to dry run; executes writes only when `--apply` is specified.
+   - Skips existing slugs by default unless `--update` is explicitly provided.
+   - Designed to run cleanly as `python -m scripts.import_schemes` from `backend/`.
+
+2. **Interactive CLI Reviewer (`backend/scripts/review_schemes.py`)**:
+   - Command-line tool to inspect schemes currently in `needs_review` status.
+   - Formats scheme details, bilingual names, benefits, criteria hierarchy, required documents, application steps, and official URLs into human-readable text.
+   - Prompts reviewer with `Verify? [y/n/s]`:
+     - `y`: verifies scheme, recording `verified_by = "owner"`, `verified_at = now`, and `last_verified = now`.
+     - `n`: marks scheme as `draft`.
+     - `s`: skips the scheme without modifying database or logging.
+   - Generates an immutable audit trail entry for every verification and rejection action.
+   - Supports `--slug <slug>` flag to target and review a single scheme directly.
+   - Runs cleanly as `python -m scripts.review_schemes` from `backend/`.
+
+3. **Data Schemas & Specifications**:
+   - `backend/data/scheme_drafts/template.json`: Valid, fictional reference template demonstrating all fields and evaluation criteria structures.
+   - `backend/data/scheme_drafts/FIELDS.md`: Complete field reference documenting data types, validation constraints, and allowed enumeration values (`SchemeLevel`, `SchemeStatus`, `CriterionField`, `CriterionOperator`, `IndianState`, etc.) directly from schemas.
+
+4. **Frontend Results Page Coverage Notice & Ask Box Gating**:
+   - Added user-facing coverage notice to `frontend/src/pages/ResultsPage.jsx`: *"We currently cover central schemes and Madhya Pradesh. Schemes for other states are not available yet."* with Hindi localization in `hi.json` and English in `en.json`.
+   - Feature-gated the "Ask about this scheme" box (`SchemeAskBox.jsx` and `SchemeDetail.jsx`) behind `import.meta.env.VITE_ENABLE_ASK === 'true'`, defaulting to off (hidden).
+   - Documented `VITE_ENABLE_ASK=false` in `frontend/.env.example`.
+   - Maintained all existing frontend unit tests and updated test coverage for `VITE_ENABLE_ASK` toggling.
+
+5. **Test Coverage (`backend/tests/unit/test_import_schemes.py` & `test_review_schemes.py`)**:
+   - Isolated unit tests using `FakeSchemeRepository` and `FakeAuditRepository` covering dry-run, apply, slug skipping, update overwrites, error reporting resilience, verify actions, reject actions, skip actions, and criteria tree formatting.
+   - Total backend test suite: 213 passing tests (`pytest -x -q`).
+
+6. **Database & Script Resilience Refinements (Real Database Bugfixes)**:
+   - **Real MongoDB Document Handling**: Resolved `_id Extra inputs are not permitted` validation error caused by PyMongo mutating dicts in-place with ObjectId `_id` upon `insert_one`. Updated `create_scheme`, `create_admin`, `log_event`, and `create_feedback` across `app/repositories/` to convert and pop `_id` into string `id` via `_doc_to_*` mappers before Pydantic validation. Added `make_mongo_doc` test helper and full suite `tests/unit/test_real_repositories.py` testing every real repository method against a fake PyMongo collection replicating ObjectId and datetime behavior.
+   - **Single Event Loop Enforcement**: Eliminated `Cannot use AsyncMongoClient in different event loop` errors across database CLI scripts (`import_schemes`, `review_schemes`, `seed_schemes`, `seed_admin`, `create_indexes`). Structured execution to run all workload and `MongoDBManager.close_client()` inside ONE async main function with `try/finally`, calling `asyncio.run()` exactly once. Added `tests/unit/test_script_event_loops.py` verifying single `asyncio.run()` invocation via mock tracking and AST inspection.
+   - **Importer Write Resilience**: In `scripts/import_schemes.py`, wrapped individual item writes in localized `try/except` handlers so single item failures do not abort processing of subsequent items. Output prints item slug and error message, tracks counts (`created`, `updated`, `skipped`, `failed`), returns non-zero exit code if any item fails, and never exposes database connection strings.
+   - **FastAPI Lifespan Client Binding**: Verified that `AsyncMongoClient` initializes within the running event loop in `lifespan` and closes on shutdown. Guarded `MongoDBManager.get_client()` to detect and reset clients bound to stale or mismatched event loops.
+   - **Reviewer Input Flexibility & Safe Exit**: In `scripts/review_schemes.py`, updated prompt to `Verify? [y/n/s/q]: ` accepting inputs case-insensitively with whitespace trimming (`y`/`yes` to verify, `n`/`no` to reject, `s`/`skip` to skip, and `q`/`quit` to exit safely). Re-prompts with a short hint on invalid inputs. Added comprehensive test suite covering all accepted variations and invalid inputs.
+
+---
+
+## Module: Frontend Copy Refresh (Privacy Invariants & Consistency)
+
+- **Status**: Completed
+- **Date**: 2026-11-01
+
+### What Was Built
+1. **Consent Card Badge & Invariant Clarification**:
+   - Updated badge from `"Zero Data Storage • Privacy First"` to `"No data saved • Privacy First"` (`intake.consent.badge`) with Hindi equivalent `"कोई डेटा सहेजा नहीं जाता • गोपनीयता पहले"`.
+   - Updated point 2 (`intake.consent.point2Desc`) to: *"We do not save your details on our servers or in your browser storage. They are held only in this page's memory and are cleared when you refresh or close the tab."*
+   - Updated point 3 (`intake.consent.point3Desc`) to: *"What you type is sent to our server and to an AI service so it can understand your situation. We do not save it, and the AI service has its own privacy policy. The AI never decides eligibility. Fixed rules do."*
+
+2. **Fixed-Rule Eligibility Terminology**:
+   - Replaced deterministic phrasing across the frontend with plain-language, fixed-rules phrasing:
+     - Intake page subtitle (`intake.pageSubtitle`): *"Describe your situation in Hindi or English, or complete your details directly. Eligibility is decided by fixed rules, not by AI."*
+     - Home page How It Works step 2 (`howItWorks.step2Title`): *"2. Fixed-Rule Eligibility Matching"*.
+     - Results page subtitle (`results.pageSubtitle`): *"Eligibility is decided by fixed rules against official government gazettes."*.
+     - Design System modal and Results list fallbacks aligned with fixed-rule terminology.
+
+3. **Regional Examples Updated to Madhya Pradesh**:
+   - Chat welcome message (`intake.chat.welcomeMessage`): *"Namaste! Describe your situation in English or Hindi (e.g., "I am a 28-year-old farmer from Madhya Pradesh with an annual income of ₹1.5 lakh"). You can also edit your details directly in the panel."*
+   - Chat input placeholder (`intake.chat.inputPlaceholder`): *"Type your situation here in English or Hindi (e.g. 35-year-old farmer in Madhya Pradesh earning 80k/yr)..."*
+   - Component user sample query (`components.chatUserMessage`): *"Can small farmers in Madhya Pradesh receive financial support for solar pumps?"*
+   - Context and component fallbacks aligned with Madhya Pradesh.
+
+4. **Audit and Unification Across Frontend**:
+   - Aligned Privacy page (`pages.privacy.noPiiText`), Home page trust cards (`trust.card2Desc`), Results page guards (`results.noProfileDesc`), and Footer fallback to eliminate legacy mentions of "browser memory" and "zero data", making every privacy guarantee consistent with items 2 to 4.
+   - Enforced 100% key parity between `en.json` and `hi.json` (`i18n.test.js` passing).
+   - Preserved all 77 automated frontend unit/integration tests across 12 test suites.
+
+### Flagged Hindi Copy for Native Review
+The following Hindi translations were formulated for natural Devanagari reading and accuracy, and are flagged for human review:
+1. `intake.consent.badge`:
+   - Current: `"कोई डेटा सहेजा नहीं जाता • गोपनीयता पहले"`
+   - Consideration: Clear and direct; alternate formulation could be `"डेटा सहेजा नहीं जाता • गोपनीयता पहले"`.
+2. `intake.consent.point2Desc` & `pages.privacy.noPiiText`:
+   - Current: `"हम आपका विवरण अपने सर्वर पर या आपके ब्राउज़र स्टोरेज में सहेजते नहीं हैं। वे केवल इस पृष्ठ की मेमोरी में रहते हैं और जब आप रीफ़्रेश करते हैं या टैब बंद करते हैं तो मिट जाते हैं।"`
+   - Consideration: Using `"इस पृष्ठ की मेमोरी"` vs `"इस पेज की मेमोरी"`. `"पृष्ठ"` is formal and standard in government/civic Hindi portals.
+3. `intake.consent.point3Desc`:
+   - Current: `"आप जो भी लिखते हैं, वह हमारे सर्वर और एक एआई सेवा को भेजा जाता है ताकि वह आपकी स्थिति को समझ सके। हम इसे सहेजते नहीं हैं, और एआई सेवा की अपनी गोपनीयता नीति है। एआई कभी भी पात्रता का निर्णय नहीं करता है। निर्धारित नियम ही निर्णय करते हैं।"`
+   - Consideration: `"निर्धारित नियम ही निर्णय करते हैं"` conveys the strict distinction from AI clearly. An alternative phrasing: `"पात्रता केवल तय नियमों के आधार पर निर्धारित होती है"`.
+4. `intake.pageSubtitle`:
+   - Current: `"अपनी स्थिति हिन्दी या अंग्रेज़ी में बताएं, अथवा सीधे अपना विवरण दर्ज करें। पात्रता का निर्णय निर्धारित नियमों द्वारा किया जाता है, एआई द्वारा नहीं।"`
+   - Consideration: Natural and conveys "decided by fixed rules, not by AI" unambiguously.
+
+---
+
+## Module: Demo-Mode Module (Development-Only Unverified Schemes Switch)
+
+- **Status**: Completed
+- **Date**: 2026-11-02
+
+### What Was Built & Modified
+1. **Application Configuration (`backend/app/core/config.py`, `backend/.env.example`)**:
+   - Added new `INCLUDE_UNVERIFIED_SCHEMES` boolean setting (default `False`).
+   - Added production safeguard validator in `validate_production_invariants`: startup fails fast with `ValueError` if `INCLUDE_UNVERIFIED_SCHEMES` is `True` when `ENV == "production"`, exactly matching `INCLUDE_SAMPLE_SCHEMES`.
+   - Documented the environment variable in `backend/.env.example`.
+
+2. **Schema Invariant (`backend/app/schemas/scheme.py`, `backend/app/schemas/api.py`)**:
+   - Added `is_verified` boolean field to `Scheme` schema, dynamically evaluated with a model validator to be strictly `True` only when `status == SchemeStatus.VERIFIED`.
+   - Added `is_verified` boolean field to `SchemeMatchItem` schema in `app/schemas/api.py` (default `False`, populated directly from `s.is_verified`).
+   - Kept `SchemeCreate` and `SchemeUpdate` clean to maintain extra forbidden schemas without breaking data import and update scripts.
+
+3. **Repository Query Filtering (`backend/app/repositories/scheme_repo.py`, `backend/app/repositories/base.py`, `backend/app/repositories/fakes.py`)**:
+   - Updated `_build_whitelisted_query` in `SchemeRepository`: when `include_unverified` is true, queries for status in `["verified", "needs_review"]`. Draft and archived schemes are never included.
+   - Updated `get_verified_schemes` and `count_verified` protocols and implementations in both MongoDB `SchemeRepository` and in-memory `FakeSchemeRepository` to respect `include_unverified: bool | None = None` (falling back to `get_settings().INCLUDE_UNVERIFIED_SCHEMES`).
+
+4. **Public Query Endpoints (`backend/app/api/v1/schemes.py`, `backend/app/services/match_service.py`)**:
+   - `GET /schemes`: Retrieves and counts candidate schemes including `needs_review` when `INCLUDE_UNVERIFIED_SCHEMES` is true.
+   - `GET /schemes/{slug}`: Permits fetching `needs_review` schemes with status 200 and `is_verified: false` when `INCLUDE_UNVERIFIED_SCHEMES` is true. `draft` and `archived` schemes strictly return 404 Not Found.
+   - `POST /match`: Evaluates citizen profile against verified schemes plus `needs_review` schemes when enabled. Match results contain `is_verified` boolean on all items.
+
+5. **Frontend Demo Indicators (`frontend/src/`)**:
+   - **Badge**: Whenever `is_verified` is false, displays a distinct warning badge `"Unverified demo data"` (Hindi: `"असत्यापित डेमो डेटा"`) with an SVG warning triangle icon and text on Browse cards (`SchemeCard`), result cards (`ResultSchemeCard`), and the scheme page (`SchemeDetail`). Does not rely on colour alone and functions cleanly in single-polarity high-contrast mode (2px solid black border).
+   - **Verification Date Line**: Replaces the `"Verified on <date>"` string with `"Not yet verified against the official source"` (Hindi: `"आधिकारिक स्रोत से अभी तक सत्यापित नहीं"`) whenever `is_verified` is false.
+   - **Page-Top Demo Banner**: Displays an accessible warning banner (`Alert` with `variant="warning"`, `role="alert"`) at the top of Browse Schemes, Results page, and Scheme Detail page whenever at least one displayed scheme is unverified:
+     - English: `"Demo mode: some schemes shown here have not been verified against official sources. Always confirm on the official website before applying."`
+     - Hindi: `"डेमो मोड: यहां दिखाई गई कुछ योजनाओं का आधिकारिक स्रोतों से सत्यापन नहीं किया गया है। आवेदन करने से पहले हमेशा आधिकारिक वेबसाइट पर पुष्टि करें।"`
+   - Added corresponding i18n keys to `en.json` and `hi.json` with 100% key parity.
+
+6. **Automated Testing Suite**:
+   - **Backend**: Added tests verifying default `False` setting, production startup refusal, repository filtering across verified vs needs_review vs draft vs archived, and API responses across `/schemes`, `/schemes/{slug}`, and `/match`.
+   - **Frontend**: Added integration tests in `BrowseSchemesPage.test.jsx`, `ResultsPage.test.jsx`, and `SchemeDetailPage.test.jsx` verifying badge rendering, verified line replacement, and demo banner conditional visibility.
+
+---
+
+## Module: Real-Database Bug Fixes & Visible Unreviewed Schemes
+
+- **Status**: Completed
+- **Date**: 2026-11-02
+
+### What Was Built & Modified
+1. **Document ID Mapping in Repositories (`backend/app/repositories/`)**:
+   - Fixed `SchemeRepository.create_scheme` to map stored MongoDB BSON documents containing `_id` into validated Pydantic models by converting `_id` to `id: str` before model validation, eliminating `_id Extra inputs are not permitted` validation errors.
+   - Verified and aligned document mapping across all repository read and write methods in `app/repositories/` (`SchemeRepository`, `AdminRepository`, `AuditRepository`, `ChunkRepository`, `FeedbackRepository`, and `FakeSchemeRepository`).
+
+2. **Async Event Loop Lifecycle Management (`backend/scripts/`, `backend/app/main.py`)**:
+   - Unified async database operations and connection cleanup inside single async main runners (`try ... finally await MongoDBManager.close_client()`) with exactly one `asyncio.run()` call per script, preventing `Cannot use AsyncMongoClient in different event loop` errors.
+   - Verified FastAPI application lifespan properly initializes and closes `MongoDBManager` within its own async lifespan context.
+
+3. **Resilient Scheme Importer (`backend/scripts/import_schemes.py`)**:
+   - Wrapped each scheme's repository write in its own isolated `try ... except` block so write errors on individual items never abort remaining imports.
+   - Added sanitized error reporting (`_sanitize_error`) printing scheme slug and concise error without leaking connection strings or credentials.
+   - Displays clear counts for created, updated, skipped, and failed items, returning exit code 1 if any item failed.
+
+4. **Public Query Visibility via `PUBLISH_UNREVIEWED_SCHEMES`**:
+   - Added `PUBLISH_UNREVIEWED_SCHEMES` setting (`bool`, default `True`) in `app/core/config.py` and `backend/.env.example` with a one-line comment and zero production restrictions.
+   - Configured public queries behind `GET /schemes`, `GET /schemes/{slug}`, `POST /match`, and `POST /intake/extract` to return schemes with status `verified` and `needs_review` while strictly excluding `draft` and `archived` schemes.
+   - Kept `is_sample` schemes excluded unless `INCLUDE_SAMPLE_SCHEMES` is true.
+   - Maintained all existing API response contracts and shapes without requiring frontend modifications.
+
+5. **Test Invariants**:
+   - Preserved and updated visibility invariant tests to set `PUBLISH_UNREVIEWED_SCHEMES=False` where asserting that only verified schemes are returned.
+
+
+

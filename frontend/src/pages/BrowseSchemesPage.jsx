@@ -87,9 +87,19 @@ export function BrowseSchemesPage() {
   const totalPages = Math.ceil(total / limit) || 1;
   const startItem = total > 0 ? skip + 1 : 0;
   const endItem = Math.min(skip + limit, total);
+  const hasUnverified = Array.isArray(schemes) && schemes.some((s) => s.is_verified === false);
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 py-6 sm:py-8" data-browse-schemes>
+      {hasUnverified && (
+        <Alert variant="warning" role="alert" data-demo-banner>
+          {t(
+            'schemes.demoModeBanner',
+            'Demo mode: some schemes shown here have not been verified against official sources. Always confirm on the official website before applying.'
+          )}
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="space-y-2">
         <div className="border-navy/20 bg-navy/10 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold text-navy">

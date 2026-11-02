@@ -120,6 +120,31 @@ export function ResultSchemeCard({ scheme }) {
               {t('schemes.card.sampleData', 'Sample')}
             </Badge>
           )}
+
+          {scheme.is_verified === false && (
+            <Badge
+              variant="warning"
+              size="sm"
+              icon={
+                <svg
+                  className="h-3.5 w-3.5 shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              }
+            >
+              {t('schemes.card.unverifiedBadge', 'Unverified demo data')}
+            </Badge>
+          )}
         </div>
 
         {/* Title */}
@@ -204,10 +229,21 @@ export function ResultSchemeCard({ scheme }) {
       {/* Footer Info & View Details */}
       <div className="mt-6 flex flex-col gap-3 border-t border-border-card pt-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-xs text-text-muted">
-          <span>{t('schemes.card.verifiedOn', 'Verified on')}: </span>
-          <span className="font-semibold text-text-primary">
-            {formatDate(scheme.last_verified)}
-          </span>
+          {scheme.is_verified === false ? (
+            <span className="font-semibold text-[#9A4A00]">
+              {t(
+                'schemes.card.notYetVerified',
+                'Not yet verified against the official source'
+              )}
+            </span>
+          ) : (
+            <>
+              <span>{t('schemes.card.verifiedOn', 'Verified on')}: </span>
+              <span className="font-semibold text-text-primary">
+                {formatDate(scheme.last_verified)}
+              </span>
+            </>
+          )}
         </div>
 
         <Link

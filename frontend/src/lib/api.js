@@ -254,7 +254,7 @@ export async function extractIntake({
 }
 
 /**
- * Deterministically match citizen profile against verified schemes in Python rule engine (POST /api/v1/match).
+ * Match citizen profile against verified schemes in Python rule engine using fixed rules (POST /api/v1/match).
  */
 export async function matchSchemes({
   profile,

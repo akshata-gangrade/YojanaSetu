@@ -168,5 +168,54 @@ describe('BrowseSchemesPage', () => {
       expect(screen.getByText(/PM Kisan Samman Nidhi/i)).toBeInTheDocument();
     });
   });
+
+  it('renders demo mode banner and unverified badge when is_verified is false', async () => {
+    const mockSchemes = [
+      {
+        slug: 'unverified-scheme',
+        name: 'Demo Unverified Welfare Scheme',
+        name_hi: 'डेमो असत्यापित कल्याण योजना',
+        level: 'central',
+        benefit_summary: 'Demo financial assistance for testing.',
+        benefit_summary_hi: 'परीक्षण के लिए डेमो वित्तीय सहायता।',
+        apply_url: 'https://example.com/apply',
+        source_url: 'https://example.com/source',
+        last_verified: '2026-10-15T00:00:00Z',
+        is_sample: false,
+        is_verified: false,
+      },
+    ];
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        items: mockSchemes,
+        total: 1,
+        skip: 0,
+        limit: 12,
+      }),
+    });
+
+    renderWithProviders(<BrowseSchemesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Demo Unverified Welfare Scheme/i)).toBeInTheDocument();
+    });
+
+    // Top banner is shown
+    expect(
+      screen.getByText(/Demo mode: some schemes shown here have not been verified against official sources/i)
+    ).toBeInTheDocument();
+
+    // Badge "Unverified demo data" is shown with icon
+    expect(screen.getByText(/Unverified demo data|असत्यापित डेमो डेटा/i)).toBeInTheDocument();
+
+    // "Verified on" is replaced with "Not yet verified against the official source"
+    expect(
+      screen.getByText(/Not yet verified against the official source|आधिकारिक स्रोत से अभी तक सत्यापित नहीं/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Verified on:/i)).not.toBeInTheDocument();
+  });
 });
 

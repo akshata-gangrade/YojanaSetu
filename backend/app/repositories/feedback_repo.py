@@ -31,8 +31,9 @@ class FeedbackRepository:
         """Insert an anonymous feedback record."""
         doc = feedback.model_dump()
         result = await self.collection.insert_one(doc)
-        doc["id"] = str(result.inserted_id)
-        return Feedback.model_validate(doc)
+        if "_id" not in doc and hasattr(result, "inserted_id"):
+            doc["_id"] = result.inserted_id
+        return self._doc_to_feedback(doc)
 
     async def get_feedback_by_scheme(
         self, scheme_id: str, limit: int = 100

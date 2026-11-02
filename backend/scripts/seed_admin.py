@@ -76,11 +76,16 @@ async def seed_first_admin() -> None:
     )
 
 
-def main() -> None:
+async def _async_main() -> None:
+    """Run initial admin seeding and close client inside one event loop with try/finally."""
     try:
-        asyncio.run(seed_first_admin())
+        await seed_first_admin()
     finally:
-        asyncio.run(MongoDBManager.close_client())
+        await MongoDBManager.close_client()
+
+
+def main() -> None:
+    asyncio.run(_async_main())
 
 
 if __name__ == "__main__":

@@ -181,7 +181,7 @@ export function IntakeChat() {
             onChange={(e) => setInputText(e.target.value.slice(0, MAX_MESSAGE_CHARS))}
             placeholder={t(
               'intake.chat.inputPlaceholder',
-              'Type your situation here in English or Hindi (e.g. 35-year-old farmer in Bihar earning 80k/yr)...'
+              'Type your situation here in English or Hindi (e.g. 35-year-old farmer in Madhya Pradesh earning 80k/yr)...'
             )}
             aria-label={t('intake.chat.inputAriaLabel', 'Citizen situation description')}
             maxLength={MAX_MESSAGE_CHARS}

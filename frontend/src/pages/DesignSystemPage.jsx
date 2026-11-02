@@ -25,7 +25,7 @@ export function DesignSystemPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
   const [activeTab, setActiveTab] = useState('overview');
-  const [inputText, setInputText] = useState('Uttar Pradesh');
+  const [inputText, setInputText] = useState('Madhya Pradesh');
   const [inputError, setInputError] = useState('');
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [cardState, setCardState] = useState('normal');
@@ -291,7 +291,7 @@ export function DesignSystemPage() {
               sender="user"
               message={t(
                 'components.chatUserMessage',
-                'Can small farmers in Uttar Pradesh receive financial support for solar pumps?'
+                'Can small farmers in Madhya Pradesh receive financial support for solar pumps?'
               )}
               timestamp="10:43 AM"
             />
@@ -442,11 +442,11 @@ export function DesignSystemPage() {
         <div className="space-y-4 text-sm text-[#1A2433]">
           <p>
             YojanaSetu operates under a strict transparency standard. Every criterion and
-            qualification decision is deterministically matched against publicly published
+            qualification decision is matched by fixed rules against publicly published
             gazettes from respective ministries.
           </p>
           <div className="rounded-lg border border-[#A3D9A3] bg-[#EAF5EA] p-3 text-xs text-[#0E6606]">
-            🔒 <strong>Zero Data Collection:</strong> We never transmit, store, or ask for
+            🔒 <strong>No Data Saved:</strong> We never save, store, or ask for
             your identity card numbers. You can use YojanaSetu completely anonymously.
           </div>
         </div>

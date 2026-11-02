@@ -1,0 +1,170 @@
+[
+    {
+        "slug": "pm-kisan-samman-nidhi",
+        "name": "Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)",
+        "name_hi": "प्रधानमंत्री किसान सम्मान निधि (पीएम-किसान)",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "agriculture",
+            "financial_assistance",
+            "farmers"
+        ],
+        "benefit_summary": "Income support of ₹6,000 a year for each eligible landholding farmer family, paid in three equal instalments of ₹2,000 every four months directly to the bank account. Also check: the land must be in the applicant's own name. Families are not eligible if any member is an institutional landholder, holds or has held a constitutional post, is a serving or retired government employee (except multi-tasking, Class IV or Group D staff), receives a pension of ₹10,000 or more a month, paid income tax in the last assessment year, or is a registered professional such as a doctor, engineer, lawyer, chartered accountant or architect.",
+        "benefit_summary_hi": "प्रत्येक पात्र भूमिधारक किसान परिवार को प्रति वर्ष ₹6,000 की आय सहायता, हर चार महीने पर ₹2,000 की तीन समान किस्तों में सीधे बैंक खाते में दी जाती है। ध्यान दें: भूमि आवेदक के अपने नाम पर होनी चाहिए। यदि परिवार का कोई सदस्य संस्थागत भूमिधारक है, संवैधानिक पद पर है या रहा है, सेवारत या सेवानिवृत्त सरकारी कर्मचारी है (बहु-कार्य, चतुर्थ श्रेणी या ग्रुप डी कर्मचारियों को छोड़कर), ₹10,000 या अधिक मासिक पेंशन पाता है, पिछले आकलन वर्ष में आयकर दाता रहा है, या पंजीकृत पेशेवर (डॉक्टर, इंजीनियर, वकील, चार्टर्ड अकाउंटेंट, आर्किटेक्ट) है, तो परिवार पात्र नहीं है।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "occupation",
+                    "op": "eq",
+                    "value": "farmer"
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Bank account number with IFSC code (Aadhaar-linked)",
+            "Land ownership record in your own name",
+            "Mobile number (advised, not mandatory)"
+        ],
+        "application_steps": [
+            "Check that you are not in any excluded category listed in the benefit summary.",
+            "Register as a new farmer in the Farmers Corner on pmkisan.gov.in, or apply through your village Patwari, revenue official or the designated officer.",
+            "Enter your name, age, gender, category (SC/ST), Aadhaar number, bank account number with IFSC code, and the self-declaration about eligibility.",
+            "Your details are verified by the State Nodal Officer against land records. Complete e-KYC on the portal with an OTP, or at a Common Service Centre with biometrics.",
+            "Check your payment status under Beneficiary Status in the Farmers Corner. If your name is missing from the list, approach the District Level Grievance Redressal Monitoring Committee."
+        ],
+        "apply_url": "https://pmkisan.gov.in/",
+        "source_url": "https://static.pib.gov.in/WriteReadData/specificdocs/documents/2021/nov/doc2021112361.pdf",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "mukhyamantri-ladli-behna-yojana",
+        "name": "Mukhyamantri Ladli Behna Yojana",
+        "name_hi": "मुख्यमंत्री लाड़ली बहना योजना",
+        "level": "state",
+        "state": "madhya_pradesh",
+        "category_tags": [
+            "women",
+            "financial_assistance",
+            "social_welfare"
+        ],
+        "benefit_summary": "Monthly financial assistance of ₹1,500 paid directly into the bank account of eligible women in Madhya Pradesh. Also check: age is counted as on 1 January of the application year. A woman is not eligible if the family pays income tax, if she or a family member is a government employee or pensioner, or if the family owns more than five acres of farmland or a four-wheeler (a tractor is excepted). A woman who already receives a pension of ₹1,000 or more a month from another scheme may also be excluded.",
+        "benefit_summary_hi": "मध्य प्रदेश की पात्र महिलाओं के बैंक खाते में प्रति माह ₹1,500 की आर्थिक सहायता सीधे जमा की जाती है। ध्यान दें: आयु की गणना आवेदन वर्ष की 1 जनवरी की स्थिति के अनुसार होती है। यदि परिवार आयकर देता है, महिला या परिवार का कोई सदस्य सरकारी कर्मचारी या पेंशनभोगी है, या परिवार के पास पाँच एकड़ से अधिक कृषि भूमि या चार पहिया वाहन (ट्रैक्टर को छोड़कर) है, तो महिला पात्र नहीं होगी। अन्य योजना से ₹1,000 या अधिक मासिक पेंशन पाने वाली महिला भी अपात्र हो सकती है।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "state",
+                    "op": "eq",
+                    "value": "madhya_pradesh"
+                },
+                {
+                    "field": "gender",
+                    "op": "eq",
+                    "value": "female"
+                },
+                {
+                    "field": "age",
+                    "op": "between",
+                    "value": [
+                        21,
+                        60
+                    ]
+                },
+                {
+                    "field": "annual_income",
+                    "op": "lte",
+                    "value": 250000
+                },
+                {
+                    "field": "marital_status",
+                    "op": "in",
+                    "value": [
+                        "married",
+                        "widowed",
+                        "divorced",
+                        "separated"
+                    ]
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Samagra ID",
+            "Bank passbook of an Aadhaar-linked, DBT-enabled account",
+            "Passport-size photograph",
+            "Mobile number",
+            "Proof of marital status such as a marriage certificate, if asked"
+        ],
+        "application_steps": [
+            "First check on the official portal whether new applications are currently open.",
+            "Make sure you have a Samagra ID and a bank account that is linked to Aadhaar and enabled for DBT.",
+            "Apply at your Gram Panchayat, ward office or the district Women and Child Development office, or on cmladlibahna.mp.gov.in.",
+            "Complete e-KYC and keep the acknowledgment receipt you are given.",
+            "Track your application and payments under Application and Payment Status on the portal."
+        ],
+        "apply_url": "https://cmladlibahna.mp.gov.in/",
+        "source_url": "https://cmladlibahna.mp.gov.in/home.aspx",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    },
+    {
+        "slug": "pm-vishwakarma",
+        "name": "PM Vishwakarma Scheme",
+        "name_hi": "प्रधानमंत्री विश्वकर्मा योजना",
+        "level": "central",
+        "state": null,
+        "category_tags": [
+            "employment_and_skills",
+            "artisans",
+            "credit"
+        ],
+        "benefit_summary": "Recognition through a PM Vishwakarma certificate and ID card, skill training with a stipend of ₹500 a day, a toolkit incentive of up to ₹15,000, and collateral-free loans of up to ₹1 lakh (18 months) and then up to ₹2 lakh (30 months) at a concessional 5% interest rate, with incentives for digital transactions and marketing support. Also check: you must work with your hands and tools in one of the 18 notified traditional trades and be at least 18 years old on the date of registration. Not eligible: people who took a similar credit-based scheme loan (such as PMEGP, Mudra or PM SVANidhi) in the past five years, government employees and their family members, and more than one member of a family.",
+        "benefit_summary_hi": "प्रधानमंत्री विश्वकर्मा प्रमाणपत्र और पहचान पत्र के साथ मान्यता, ₹500 प्रतिदिन के वजीफे के साथ कौशल प्रशिक्षण, ₹15,000 तक की टूलकिट सहायता, और 5% की रियायती ब्याज दर पर बिना गारंटी के ऋण: पहले ₹1 लाख तक (18 माह) और फिर ₹2 लाख तक (30 माह), साथ ही डिजिटल लेन-देन पर प्रोत्साहन और विपणन सहायता। ध्यान दें: आवेदक 18 अधिसूचित पारंपरिक व्यवसायों में से किसी एक में हाथ और औज़ारों से काम करता हो और पंजीकरण की तिथि पर कम से कम 18 वर्ष का हो। पिछले पाँच वर्षों में पीएमईजीपी, मुद्रा या पीएम स्वनिधि जैसी समान ऋण योजना का लाभ लेने वाले, सरकारी कर्मचारी और उनके परिवार के सदस्य, तथा एक परिवार से एक से अधिक सदस्य पात्र नहीं हैं।",
+        "eligibility_criteria": {
+            "all_of": [
+                {
+                    "field": "occupation",
+                    "op": "eq",
+                    "value": "artisan"
+                },
+                {
+                    "field": "age",
+                    "op": "gte",
+                    "value": 18
+                }
+            ]
+        },
+        "required_documents": [
+            "Aadhaar card",
+            "Mobile number linked to Aadhaar",
+            "Bank account details",
+            "Ration card",
+            "Details of your trade"
+        ],
+        "application_steps": [
+            "Check that you work in one of the 18 notified traditional trades and are at least 18 years old.",
+            "Register on pmvishwakarma.gov.in or at a Common Service Centre with your Aadhaar, mobile number and bank details.",
+            "Complete the Aadhaar-based verification and select your trade. Your application goes through a three-stage verification.",
+            "After approval you receive the PM Vishwakarma certificate and ID card. Attend the basic training (5 to 7 days) to receive the ₹500 daily stipend and the toolkit e-voucher.",
+            "After training you can apply for the first loan of up to ₹1 lakh. The second loan of up to ₹2 lakh follows after the first is repaid."
+        ],
+        "apply_url": "https://pmvishwakarma.gov.in/",
+        "source_url": "https://myscheme.gov.in/schemes/pmv",
+        "source_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "status": "needs_review",
+        "verified_by": null,
+        "verified_at": null,
+        "last_verified": "2026-11-01T00:00:00Z",
+        "is_sample": false
+    }
+]

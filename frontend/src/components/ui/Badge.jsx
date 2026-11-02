@@ -29,6 +29,10 @@ export function Badge({
       container: 'bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1]',
       icon: '✕',
     },
+    warning: {
+      container: 'bg-[#FFF4E5] text-[#9A4A00] border border-[#FFD099]',
+      icon: '⚠',
+    },
     navy: {
       container: 'bg-[#EBF1FA] text-[#0B2A5B] border border-[#C2D6EE]',
       dot: 'bg-[#0B2A5B]',

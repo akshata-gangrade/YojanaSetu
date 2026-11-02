@@ -124,6 +124,7 @@ def get_intake_service(
     scheme_repo: ISchemeRepository = Depends(get_scheme_repo),
     rule_engine: RuleEngineService = Depends(get_rule_engine),
     followup_selector: FollowupSelectorService = Depends(get_followup_selector),
+    settings: Settings = Depends(get_settings),
 ) -> IntakeService:
     """Provide citizen intake orchestration service."""
     return IntakeService(
@@ -131,17 +132,20 @@ def get_intake_service(
         scheme_repo=scheme_repo,
         rule_engine=rule_engine,
         followup_selector=followup_selector,
+        settings=settings,
     )
 
 
 def get_match_service(
     scheme_repo: ISchemeRepository = Depends(get_scheme_repo),
     rule_engine: RuleEngineService = Depends(get_rule_engine),
+    settings: Settings = Depends(get_settings),
 ) -> MatchService:
     """Provide deterministic scheme matching service."""
     return MatchService(
         scheme_repo=scheme_repo,
         rule_engine=rule_engine,
+        settings=settings,
     )
 
 
